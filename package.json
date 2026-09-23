@@ -1,5 +1,5 @@
 {
-  "name": "resumate",
+  "name": "redrafted",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
+    "@vercel/speed-insights": "^2.0.0",
     "mammoth": "^1.12.3",
     "next": "16.3.6",
     "pdf-parse": "^2.4.5",

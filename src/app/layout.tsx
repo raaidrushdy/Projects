@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Manrope, Source_Serif_4 } from "next/font/google";
+import { Fredoka, Manrope, Source_Serif_4 } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { FeedbackFooter } from "@/components/FeedbackFooter";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -8,7 +9,8 @@ import "./globals.css";
 // over the unexamined Inter/Geist default. Source Serif for the tailored
 // resume/cover letter output specifically: it's the one place in the app
 // that should read as a document the user is about to submit somewhere,
-// not as UI.
+// not as UI. Fredoka for the wordmark only — one place for personality,
+// not spread across the whole UI.
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
@@ -19,8 +21,14 @@ const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
 });
 
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["600"],
+});
+
 export const metadata: Metadata = {
-  title: "Resumate — Tailor your resume in seconds",
+  title: "Redrafted — Tailor your resume in seconds",
   description:
     "Paste your resume and a job posting to get an AI-tailored resume and cover letter.",
 };
@@ -30,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${manrope.variable} ${sourceSerif.variable} h-full antialiased`}
+      className={`${manrope.variable} ${sourceSerif.variable} ${fredoka.variable} h-full antialiased`}
     >
       <head>
         {/* Sets data-theme before first paint (localStorage, else system
@@ -42,6 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <FeedbackFooter />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -99,7 +99,7 @@ export default function Home() {
             <LogoMark />
           </div>
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Resumate</h1>
+            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Redrafted</h1>
             <p className="mx-auto max-w-md text-muted">
               Upload or paste your resume and a job posting — get a tailored resume and cover
               letter back in seconds.
@@ -112,7 +112,7 @@ export default function Home() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-6 rounded-3xl border border-line bg-surface p-6 shadow-sm sm:p-8"
+          className="flex flex-col gap-6 rounded-3xl border border-line bg-panel p-6 shadow-sm sm:p-8"
         >
           <div className="grid gap-6 sm:grid-cols-2">
             <ResumeField value={resume} onChange={setResume} />
@@ -124,7 +124,7 @@ export default function Home() {
                 onChange={(event) => setJobDescription(event.target.value)}
                 placeholder="Paste the job posting you're applying to..."
                 rows={12}
-                className="w-full resize-y rounded-xl border border-line bg-transparent p-3 text-sm outline-none focus:border-accent"
+                className="w-full resize-y rounded-xl bg-surface p-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
               />
             </label>
           </div>
@@ -133,7 +133,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? <Spinner /> : <SparkleIcon />}
               {loading ? "Tailoring..." : "Tailor my resume"}

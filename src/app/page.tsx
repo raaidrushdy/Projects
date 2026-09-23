@@ -2,13 +2,7 @@
 
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { CopyButton } from "@/components/CopyButton";
-import {
-  FREE_TIER_LIMIT,
-  getRemaining,
-  getServerRemaining,
-  recordUse,
-  subscribeToUsage,
-} from "@/lib/usage";
+import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
 
 interface TailorResult {
   tailoredResume: string;
@@ -74,6 +68,9 @@ export default function Home() {
           Paste your resume and a job posting. Get a tailored resume and cover letter in
           seconds.
         </p>
+        <span className="w-fit rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+          Free while we&apos;re testing
+        </span>
       </header>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -110,17 +107,12 @@ export default function Home() {
             {loading ? "Tailoring..." : "Tailor my resume"}
           </button>
 
-          <span className="text-sm text-neutral-600 dark:text-neutral-400">
-            {outOfFreeUses
-              ? "You've used all your free tailorings."
-              : `${remaining} of ${FREE_TIER_LIMIT} free tailorings left`}
-          </span>
         </div>
 
         {outOfFreeUses && (
           <div className="rounded-lg border border-amber-400/40 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-            You&apos;re out of free tailorings. Unlimited access via subscription is coming
-            soon — check back shortly.
+            You&apos;ve hit today&apos;s usage cap on this browser. Message us if you want to
+            keep testing — we&apos;ll bump it up.
           </div>
         )}
 

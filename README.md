@@ -14,8 +14,8 @@ posting's language, without inventing new facts.
 
 - Next.js (App Router) + TypeScript + Tailwind CSS
 - Claude API (`@anthropic-ai/sdk`) for the resume/cover-letter generation
-- Free tier tracked client-side (3 free tailorings); paid/unlimited tier is not wired up
-  yet — see "Monetization" below
+- Currently **free for everyone** while we test — no billing wired up yet, see
+  "Monetization" below
 
 ## Getting started
 
@@ -46,13 +46,16 @@ posting's language, without inventing new facts.
   and a results view with copy/download for the tailored resume and cover letter.
 - `src/app/api/tailor/route.ts` — server route that calls the Claude API and returns
   `{ tailoredResume, coverLetter }` as JSON.
-- `src/lib/usage.ts` — tracks free-tier usage in `localStorage` (resets if storage is
-  cleared; this is a placeholder, not a real entitlement system).
+- `src/lib/usage.ts` — tracks usage in `localStorage` per browser, purely as a sanity
+  cap against runaway API cost (resets if storage is cleared; not an entitlement system).
 
 ## Monetization (not yet implemented)
 
-The plan is freemium: 3 free tailorings, then a paid subscription for unlimited use.
-The free-tier counter above is a client-side stub for demo purposes. To make this real:
+The app is free for everyone right now, on purpose, while we validate that people
+actually want it. Since it runs on your own Anthropic API key, every generation costs
+you money even though users don't pay — don't blast the link to a huge audience until
+billing is in place. Eventual plan: freemium, with a paid subscription for unlimited use.
+To make that real:
 
 - Add auth (e.g. NextAuth) so usage limits can't be reset by clearing `localStorage`
 - Add Stripe Checkout + a webhook to grant subscription status

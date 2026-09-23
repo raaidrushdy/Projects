@@ -106,7 +106,9 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium">Your resume</span>
+        <span id="resume-field-label" className="text-sm font-medium">
+          Your resume
+        </span>
         {fileName && (
           <button
             type="button"
@@ -147,6 +149,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
           onChange={(event) => onChange(event.target.value)}
           onScroll={handleTextareaScroll}
           rows={12}
+          aria-labelledby="resume-field-label"
           className="w-full resize-y bg-transparent py-3 pr-3 leading-relaxed outline-none"
         />
 

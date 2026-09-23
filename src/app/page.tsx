@@ -112,6 +112,7 @@ export default function Home() {
           </span>
         </header>
 
+        <main className="contents">
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-6 rounded-3xl border border-line bg-panel p-4 shadow-sm sm:p-6 lg:p-8"
@@ -155,13 +156,19 @@ export default function Home() {
           </div>
 
           {outOfFreeUses && (
-            <div className="rounded-xl border border-score-mid/40 bg-score-mid/10 p-4 text-sm text-score-mid">
+            <div
+              role="status"
+              className="rounded-xl border border-score-mid/40 bg-score-mid/10 p-4 text-sm text-score-mid"
+            >
               Message us if you want to keep testing — we&apos;ll bump it up.
             </div>
           )}
 
           {error && (
-            <div className="rounded-xl border border-score-low/40 bg-score-low/10 p-4 text-sm text-score-low">
+            <div
+              role="alert"
+              className="rounded-xl border border-score-low/40 bg-score-low/10 p-4 text-sm text-score-low"
+            >
               {error}
             </div>
           )}
@@ -184,6 +191,7 @@ export default function Home() {
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>
         )}
+        </main>
       </div>
     </div>
   );

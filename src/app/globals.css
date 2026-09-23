@@ -26,9 +26,16 @@
      than a single shared value. */
   --accent-foreground: #ffffff;
 
-  --score-high: #2f7a4f;
-  --score-mid: #b8860b;
-  --score-low: #b3402e;
+  /* Darkened from the initial picks (#2f7a4f / #b8860b / #b3402e) — those
+     cleared AA against a plain surface but not against their own /10-tinted
+     banner background (the actual pairing used in the usage-cap and error
+     banners), down to 2.2:1 in score-mid's case. Values below are the
+     minimal darkening (same hue/saturation) that clears 4.5:1 against that
+     worst-case tinted pairing, verified by computing composited contrast
+     directly rather than assuming the plain-background numbers generalized. */
+  --score-high: #2a6d47;
+  --score-mid: #7e5c08;
+  --score-low: #a93c2b;
 }
 
 :root[data-theme="dark"] {

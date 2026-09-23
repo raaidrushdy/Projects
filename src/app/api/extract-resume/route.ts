@@ -3,6 +3,9 @@ import mammoth from "mammoth";
 import { PDFParse } from "pdf-parse";
 
 export const runtime = "nodejs";
+// A large scanned PDF can take a while to parse; give it room on the platform's
+// serverless timeout rather than risk a mid-parse cutoff.
+export const maxDuration = 60;
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { parseJsonResponse } from "@/lib/api";
 import { MatchAnalysis } from "@/components/MatchAnalysis";
 import { ResultCard } from "@/components/ResultCard";
 import { ResumeField } from "@/components/ResumeField";
@@ -67,10 +68,12 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resume, jobDescription }),
       });
-      const data = await response.json();
+      const data = (await parseJsonResponse(response)) as Partial<TailorResult> & {
+        error?: string;
+      };
 
       if (!response.ok) {
-        throw new Error(data?.error ?? "Something went wrong. Please try again.");
+        throw new Error(data.error ?? "Something went wrong. Please try again.");
       }
 
       setResult(data as TailorResult);

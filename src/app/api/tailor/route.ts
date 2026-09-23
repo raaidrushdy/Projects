@@ -4,6 +4,9 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 
 export const runtime = "nodejs";
+// Adaptive thinking + a 16k output budget can comfortably exceed the platform's
+// default serverless timeout; this is the max duration Vercel's Hobby plan allows.
+export const maxDuration = 60;
 
 const MAX_INPUT_CHARS = 20000;
 

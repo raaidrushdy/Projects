@@ -5,26 +5,28 @@
  * dark mode. The attribute is set before first paint by the inline script in
  * layout.tsx (reads localStorage, falls back to prefers-color-scheme) so
  * there's no flash of the wrong theme, and toggled at runtime by
- * ThemeToggle/src/lib/theme.ts. One accent color per theme, used only for
- * primary actions, the badge, and focus states — never as decoration. Three
- * surface tones give nested cards depth without borders doing all the work:
- * background (page) -> panel (the workspace card wrapping the inputs) ->
- * surface (the inputs themselves, and standalone cards like the results —
- * brightest, "paper" tone).
+ * ThemeToggle/src/lib/theme.ts.
+ *
+ * Palette is an editor's desk, not a SaaS dashboard: paper surfaces, ink
+ * text, a stamp-ink accent reserved for primary actions/badge/focus, and a
+ * correction-red used only for the redline "removed" mark on the tailored
+ * resume (RedlineView) — never for anything else, so it can't be confused
+ * with the score-low semantic color. Three surface tones give nested cards
+ * depth without borders doing all the work: background (page) -> panel (the
+ * workspace card wrapping the inputs) -> surface (the inputs themselves,
+ * and standalone cards like the results — brightest, "paper" tone).
  */
 :root {
-  --background: #f7f6f3;
-  --panel: #eeece5;
-  --surface: #ffffff;
-  --foreground: #1a1a18;
-  --muted: #6b6b66;
-  --line: #e2e0da;
+  --background: #f6f2ea;
+  --panel: #ece4d3;
+  --surface: #fffdf8;
+  --foreground: #221f1a;
+  --muted: #6b655e;
+  --line: #ddd3bf;
 
-  --accent: #3f7d5c;
-  /* White text on the light-mode accent clears AA (4.88:1); on the darker
-     dark-mode accent below it would not, so this is theme-specific rather
-     than a single shared value. */
+  --accent: #2d3b6b;
   --accent-foreground: #ffffff;
+  --redline-remove: #a13f35;
 
   /* Darkened from the initial picks (#2f7a4f / #b8860b / #b3402e) — those
      cleared AA against a plain surface but not against their own /10-tinted
@@ -39,17 +41,18 @@
 }
 
 :root[data-theme="dark"] {
-  --background: #0d0f12;
-  --panel: #17191d;
-  --surface: #1f2226;
-  --foreground: #e8e8e6;
-  --muted: #9a9a96;
-  --line: #2a2c30;
+  --background: #141210;
+  --panel: #1e1b17;
+  --surface: #28241f;
+  --foreground: #efe9df;
+  --muted: #a39a8d;
+  --line: #3a352d;
 
-  --accent: #5fa87a;
-  /* White-on-accent is only 2.71:1 here (fails AA) because this accent is
-     light against a near-black page — near-black text on it clears 6.73:1. */
-  --accent-foreground: #0d0f12;
+  --accent: #8b9de0;
+  /* Light accent against a near-black page — near-black text clears 7.12:1,
+     white would not. */
+  --accent-foreground: #141210;
+  --redline-remove: #e08b76;
 
   --score-high: #4fa571;
   --score-mid: #d6a33d;
@@ -65,6 +68,7 @@
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-redline-remove: var(--redline-remove);
   --color-score-high: var(--score-high);
   --color-score-mid: var(--score-mid);
   --color-score-low: var(--score-low);

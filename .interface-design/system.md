@@ -2,11 +2,13 @@
 
 ## Direction
 
-**Personality:** Utility & Function, with a document-first sensibility — the app itself stays quiet (muted, borders-only) so the resume/cover-letter output can read as the one thing that matters.
+**Personality:** The editor's desk — an editorial/document sensibility, not a SaaS dashboard. The app itself stays quiet (muted, borders-only) so the resume/cover-letter output can read as the one thing that matters, and the tailoring process itself is shown, not just asserted.
 
-**Foundation:** Warm neutral (light: `#f7f6f3` background, not stark white/gray) / cool neutral (dark: `#0d0f12`), tinted by a single green accent used only for primary actions, the badge, and focus rings — never as decoration.
+**Foundation:** Paper/ink neutral (light: `#f6f2ea` background, manila-tan `panel`, warm ivory `surface`) / dark study (dark: `#141210`), tinted by a single deep stamp-ink indigo accent used only for primary actions, the badge, and focus rings — never as decoration — plus one second color, correction-red, reserved *exclusively* for the redline "removed" mark (never elsewhere, so it can't be confused with the unrelated score-low semantic color).
 
 **Depth:** Borders-only + three-tier surface tonality, not shadows. `background` (page) → `panel` (the workspace card wrapping the inputs) → `surface` (the inputs themselves, and standalone result cards — the brightest, "paper" tone). `shadow-sm` appears sparingly on cards/inputs, never stacked.
+
+**Signature:** the tailored resume can be viewed as a redline — struck-through removed phrasing in correction-red, underlined inserted phrasing in the accent — via a "Show changes" toggle (`RedlineView.tsx`, word-level diff in `lib/diff.ts`). This is the one thing only this product could have: it shows the tailoring happening instead of just handing over a finished swap.
 
 ## Tokens
 
@@ -18,32 +20,34 @@ Responsive: padding steps up at `sm:`/`lg:` rather than staying fixed (e.g. card
 ### Colors
 ```
 Light
---background: #f7f6f3
---panel:      #eeece5
---surface:    #ffffff
---foreground: #1a1a18
---muted:      #6b6b66
---line:       #e2e0da
---accent:            #3f7d5c
+--background:     #f6f2ea
+--panel:          #ece4d3
+--surface:        #fffdf8
+--foreground:     #221f1a
+--muted:          #6b655e
+--line:           #ddd3bf
+--accent:            #2d3b6b
 --accent-foreground: #ffffff
---score-high: #2f7a4f
---score-mid:  #b8860b
---score-low:  #b3402e
+--redline-remove: #a13f35
+--score-high: #2a6d47
+--score-mid:  #7e5c08
+--score-low:  #a93c2b
 
 Dark
---background: #0d0f12
---panel:      #17191d
---surface:    #1f2226
---foreground: #e8e8e6
---muted:      #9a9a96
---line:       #2a2c30
---accent:            #5fa87a
---accent-foreground: #0d0f12
+--background:     #141210
+--panel:          #1e1b17
+--surface:        #28241f
+--foreground:     #efe9df
+--muted:          #a39a8d
+--line:           #3a352d
+--accent:            #8b9de0
+--accent-foreground: #141210
+--redline-remove: #e08b76
 --score-high: #4fa571
 --score-mid:  #d6a33d
 --score-low:  #d97862
 ```
-Manual `:root[data-theme]` toggle, not `prefers-color-scheme`/Tailwind `dark:` — lets a manual override win over the OS setting. `muted`-on-`panel` is tuned to stay just above WCAG AA (4.53:1 in light mode); don't darken `panel` further without re-checking that.
+Manual `:root[data-theme]` toggle, not `prefers-color-scheme`/Tailwind `dark:` — lets a manual override win over the OS setting. Every pairing above (including `text-*` on its own `/10`-tinted background, the pattern the usage-cap/error banners and the redline marks actually use) is contrast-checked to clear WCAG AA — don't move a color without recomputing against that tinted pairing, not just the plain surface.
 
 ### Radius
 Scale: `rounded-lg` (8px, buttons/inputs) · `rounded-xl` (12px, textareas/inner panels) · `rounded-2xl` (16px, logo mark) · `rounded-3xl` (24px, the main workspace card) · `rounded-full` (pills, primary button, badge)
@@ -86,6 +90,7 @@ Scale: `rounded-lg` (8px, buttons/inputs) · `rounded-xl` (12px, textareas/inner
 ### Result Card (tailored resume / cover letter text)
 - `rounded-md`, `border border-line`, `bg-surface`, `p-5`
 - `font-serif` for prose output, `font-mono` when the content is LaTeX source
+- When an `originalText` is available (the tailored resume, not the cover letter — a cover letter has no "before"), a "Show changes" toggle switches the pane to `RedlineView`: same card chrome, but removed words are `text-redline-remove line-through opacity-75` and inserted words are `text-accent font-semibold underline`. Not offered for LaTeX output (diffing source isn't the point; the existing monospace view already treats it as code).
 
 ### Responsive
 - Two-field layout stacks single-column below `md:` (768px, not Tailwind's default 640px — 640 felt cramped in testing) with a horizontal divider; side-by-side at `md:`+ with a vertical divider.
@@ -106,3 +111,6 @@ Scale: `rounded-lg` (8px, buttons/inputs) · `rounded-xl` (12px, textareas/inner
 | Fredoka reserved for the wordmark only | One place for personality; keeps the rest of the UI quiet | 2026-09-23 |
 | 44×44px minimum tap targets everywhere interactive | Apple HIG floor — the app is used on mobile Safari | 2026-09-23 |
 | 768px/1024px breakpoints instead of Tailwind's default 640px | The two-field grid felt cramped below 768px in real-device testing | 2026-09-23 |
+| Repalette: SaaS-green → editorial paper/ink/stamp-indigo | The green+cream combo read as generic "wellness SaaS"; the product's own domain (editing, red-lining, tailoring) gives a more specific world to draw from — confirmed with the user via a rendered direction board before building | 2026-09-23 |
+| Redline diff as the results signature, not a plain text swap | Shows the tailoring happening instead of just asserting it — the one thing only this product could have | 2026-09-23 |
+| Word-level diff tokenizes "word + trailing whitespace" as one unit, not word/space separately | A separate whitespace token is generic enough that LCS matches it to *any* other space in the document, not the visually adjacent one — silently swallowing spacing between del/ins runs. Caught via a rendered screenshot before shipping. | 2026-09-23 |

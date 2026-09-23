@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
+import { RedlineView } from "@/components/RedlineView";
 
 function DownloadIcon() {
   return (
@@ -31,9 +33,16 @@ interface ResultCardProps {
   /** LaTeX source reads as code, not prose — monospace instead of the document serif. */
   monospace?: boolean;
   note?: string;
+  /** The pre-tailoring text this was drafted from. When set (and not
+      monospace/LaTeX), a toggle lets the reader see the tailoring as an
+      edit — the redline — instead of just the finished text. */
+  originalText?: string;
 }
 
-export function ResultCard({ title, text, filename, monospace, note }: ResultCardProps) {
+export function ResultCard({ title, text, filename, monospace, note, originalText }: ResultCardProps) {
+  const [showChanges, setShowChanges] = useState(false);
+  const canShowChanges = Boolean(originalText) && !monospace;
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
@@ -41,7 +50,21 @@ export function ResultCard({ title, text, filename, monospace, note }: ResultCar
           <h2 className="text-base font-semibold tracking-tight">{title}</h2>
           {note && <p className="text-xs text-muted">{note}</p>}
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">
+          {canShowChanges && (
+            <button
+              type="button"
+              onClick={() => setShowChanges((value) => !value)}
+              aria-pressed={showChanges}
+              className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                showChanges
+                  ? "border-accent/40 bg-accent/10 text-accent"
+                  : "border-line text-muted hover:bg-foreground/5"
+              }`}
+            >
+              {showChanges ? "Hide changes" : "Show changes"}
+            </button>
+          )}
           <CopyButton text={text} label="Copy" />
           <button
             type="button"
@@ -53,13 +76,18 @@ export function ResultCard({ title, text, filename, monospace, note }: ResultCar
           </button>
         </div>
       </div>
+
       {/* Deliberately paper-like rather than another UI card: this is the
           document the user is about to submit somewhere, not app chrome. */}
-      <pre
-        className={`max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 text-sm leading-relaxed shadow-sm ${monospace ? "font-mono" : "font-serif"}`}
-      >
-        {text}
-      </pre>
+      {canShowChanges && showChanges ? (
+        <RedlineView before={originalText as string} after={text} />
+      ) : (
+        <pre
+          className={`max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 text-sm leading-relaxed shadow-sm ${monospace ? "font-mono" : "font-serif"}`}
+        >
+          {text}
+        </pre>
+      )}
     </div>
   );
 }

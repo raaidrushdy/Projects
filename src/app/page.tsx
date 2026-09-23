@@ -89,7 +89,7 @@ export default function Home() {
 
   return (
     <div className="flex-1">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-6 py-16 sm:py-20">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:max-w-4xl lg:py-20">
         <div className="flex justify-end">
           <ThemeToggle />
         </div>
@@ -99,7 +99,9 @@ export default function Home() {
             <LogoMark />
           </div>
           <div className="flex flex-col gap-2">
-            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Redrafted</h1>
+            <h1 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
+              Redrafted
+            </h1>
             <p className="mx-auto max-w-md text-muted">
               Upload or paste your resume and a job posting — get a tailored resume and cover
               letter back in seconds.
@@ -112,19 +114,25 @@ export default function Home() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-6 rounded-3xl border border-line bg-panel p-6 shadow-sm sm:p-8"
+          className="flex flex-col gap-6 rounded-3xl border border-line bg-panel p-4 shadow-sm sm:p-6 lg:p-8"
         >
-          <div className="grid gap-6 sm:grid-cols-2">
-            <ResumeField value={resume} onChange={setResume} />
+          <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:gap-8">
+            <div className="min-w-0 flex-1">
+              <ResumeField value={resume} onChange={setResume} />
+            </div>
 
-            <label className="flex flex-col gap-2">
+            {/* Horizontal on mobile (stacked column), vertical once the
+                fields sit side by side at md: and up. */}
+            <div aria-hidden="true" className="h-px w-full bg-line md:h-auto md:w-px" />
+
+            <label className="flex min-w-0 flex-1 flex-col gap-2">
               <span className="text-sm font-medium">Job description</span>
               <textarea
                 value={jobDescription}
                 onChange={(event) => setJobDescription(event.target.value)}
                 placeholder="Paste the job posting you're applying to..."
                 rows={12}
-                className="w-full resize-y rounded-xl bg-surface p-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
+                className="w-full resize-y rounded-xl bg-surface p-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
               />
             </label>
           </div>
@@ -133,7 +141,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? <Spinner /> : <SparkleIcon />}
               {loading ? "Tailoring..." : "Tailor my resume"}

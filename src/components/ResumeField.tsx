@@ -111,7 +111,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
           <button
             type="button"
             onClick={clearFile}
-            className="text-xs text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+            className="inline-flex min-h-11 items-center text-xs text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
           >
             {fileName} · clear
           </button>
@@ -128,7 +128,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`relative flex overflow-hidden rounded-lg bg-surface font-mono text-sm shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40 ${
+        className={`relative flex overflow-hidden rounded-lg bg-surface font-mono text-base shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40 ${
           isDragging ? "ring-2 ring-accent bg-accent/5" : ""
         }`}
       >
@@ -158,7 +158,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="pointer-events-auto font-medium text-foreground underline underline-offset-2"
+                className="pointer-events-auto inline-flex min-h-11 items-center px-1 font-medium text-foreground underline underline-offset-2"
               >
                 browse files
               </button>

@@ -15,6 +15,8 @@ interface TailorResult {
   coverLetter: string;
 }
 
+const GENERIC_ERROR = "The tailoring request failed. Try again in a moment.";
+
 function LogoMark() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-5 w-5">
@@ -37,9 +39,7 @@ function SparkleIcon() {
 }
 
 function Spinner() {
-  return (
-    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white dark:border-neutral-900/30 dark:border-t-neutral-900" />
-  );
+  return <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-foreground/40 border-t-brand-foreground" />;
 }
 
 export default function Home() {
@@ -73,47 +73,40 @@ export default function Home() {
       };
 
       if (!response.ok) {
-        throw new Error(data.error ?? "Something went wrong. Please try again.");
+        throw new Error(data.error ?? GENERIC_ERROR);
       }
 
       setResult(data as TailorResult);
       recordUse();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : GENERIC_ERROR);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="relative isolate flex-1">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[28rem] overflow-hidden"
-      >
-        <div className="absolute left-1/2 top-[-12rem] h-[26rem] w-[45rem] -translate-x-1/2 rounded-full bg-gradient-to-br from-indigo-200/50 via-sky-200/30 to-transparent blur-3xl dark:from-indigo-500/10 dark:via-sky-500/10 dark:to-transparent" />
-      </div>
-
+    <div className="flex-1">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-6 py-16 sm:py-20">
         <header className="flex flex-col items-center gap-4 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
             <LogoMark />
           </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Resumate</h1>
-            <p className="mx-auto max-w-md text-neutral-600 dark:text-neutral-400">
+            <p className="mx-auto max-w-md text-muted">
               Upload or paste your resume and a job posting — get a tailored resume and cover
               letter back in seconds.
             </p>
           </div>
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+          <span className="rounded-full border border-brand/30 px-3 py-1 text-xs font-medium text-brand">
             Free while we&apos;re testing
           </span>
         </header>
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-6 rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.03] sm:p-8"
+          className="flex flex-col gap-6 rounded-3xl border border-black/10 bg-surface p-6 shadow-sm dark:border-white/10 sm:p-8"
         >
           <div className="grid gap-6 sm:grid-cols-2">
             <ResumeField value={resume} onChange={setResume} />
@@ -125,7 +118,7 @@ export default function Home() {
                 onChange={(event) => setJobDescription(event.target.value)}
                 placeholder="Paste the job posting you're applying to..."
                 rows={12}
-                className="w-full resize-y rounded-xl border border-black/10 bg-transparent p-3 text-sm outline-none focus:border-black/30 dark:border-white/15 dark:focus:border-white/30"
+                className="w-full resize-y rounded-xl border border-black/10 bg-transparent p-3 text-sm outline-none focus:border-brand dark:border-white/15"
               />
             </label>
           </div>
@@ -134,13 +127,13 @@ export default function Home() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-neutral-900"
+              className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? <Spinner /> : <SparkleIcon />}
               {loading ? "Tailoring..." : "Tailor my resume"}
             </button>
 
-            <span className="text-sm text-neutral-500 dark:text-neutral-400">
+            <span className="text-sm text-muted">
               {outOfFreeUses
                 ? "You've hit today's usage cap on this browser."
                 : `${remaining} free tailoring${remaining === 1 ? "" : "s"} left on this browser`}
@@ -148,20 +141,20 @@ export default function Home() {
           </div>
 
           {outOfFreeUses && (
-            <div className="rounded-xl border border-amber-400/40 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+            <div className="rounded-xl border border-score-mid/40 bg-score-mid/10 p-4 text-sm text-score-mid">
               Message us if you want to keep testing — we&apos;ll bump it up.
             </div>
           )}
 
           {error && (
-            <div className="rounded-xl border border-red-400/40 bg-red-50 p-4 text-sm text-red-900 dark:bg-red-950/30 dark:text-red-200">
+            <div className="rounded-xl border border-score-low/40 bg-score-low/10 p-4 text-sm text-score-low">
               {error}
             </div>
           )}
         </form>
 
         {result && (
-          <section className="flex flex-col gap-6">
+          <section className="animate-reveal flex flex-col gap-6">
             <MatchAnalysis
               matchScore={result.matchScore}
               missingKeywords={result.missingKeywords}

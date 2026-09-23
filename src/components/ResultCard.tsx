@@ -32,7 +32,7 @@ interface ResultCardProps {
 
 export function ResultCard({ title, text, filename }: ResultCardProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-white/60 p-5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-base font-semibold tracking-tight">{title}</h2>
         <div className="flex gap-2">
@@ -40,14 +40,16 @@ export function ResultCard({ title, text, filename }: ResultCardProps) {
           <button
             type="button"
             onClick={() => downloadTextFile(filename, text)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium text-neutral-700 transition hover:bg-black/5 dark:border-white/15 dark:text-neutral-200 dark:hover:bg-white/10"
+            className="inline-flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
           >
             <DownloadIcon />
             Download
           </button>
         </div>
       </div>
-      <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-xl border border-black/5 bg-black/[0.02] p-4 text-sm leading-relaxed dark:border-white/10 dark:bg-white/[0.02]">
+      {/* Deliberately paper-like rather than another UI card: this is the
+          document the user is about to submit somewhere, not app chrome. */}
+      <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-black/10 bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm dark:border-white/10">
         {text}
       </pre>
     </div>

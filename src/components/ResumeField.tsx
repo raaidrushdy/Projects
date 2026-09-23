@@ -98,7 +98,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
           <button
             type="button"
             onClick={clearFile}
-            className="text-xs text-neutral-500 underline decoration-neutral-300 underline-offset-2 transition hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+            className="text-xs text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
           >
             {fileName} · clear
           </button>
@@ -113,9 +113,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={`relative rounded-xl border transition ${
-          isDragging
-            ? "border-neutral-400 bg-neutral-50 dark:border-neutral-500 dark:bg-neutral-900"
-            : "border-black/10 dark:border-white/15"
+          isDragging ? "border-brand bg-brand/5" : "border-black/10 dark:border-white/15"
         }`}
       >
         <textarea
@@ -123,18 +121,18 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
           onChange={(event) => onChange(event.target.value)}
           placeholder={showOverlay ? "" : ""}
           rows={12}
-          className="w-full resize-y rounded-xl bg-transparent p-3 text-sm outline-none focus:border-black/30 dark:focus:border-white/30"
+          className="w-full resize-y rounded-xl bg-transparent p-3 text-sm outline-none focus:border-brand"
         />
 
         {showOverlay && (
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-neutral-500 dark:text-neutral-400">
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-muted">
             <UploadIcon />
             <p className="text-sm">
               Drop your resume here, or{" "}
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="pointer-events-auto font-medium text-neutral-800 underline underline-offset-2 dark:text-neutral-200"
+                className="pointer-events-auto font-medium text-foreground underline underline-offset-2"
               >
                 browse files
               </button>
@@ -144,14 +142,14 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         )}
 
         {isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-xl bg-white/80 text-sm text-neutral-600 dark:bg-neutral-950/80 dark:text-neutral-300">
-            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-neutral-400 border-t-transparent" />
+          <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-xl bg-surface/90 text-sm text-muted">
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted/50 border-t-transparent" />
             Reading your file...
           </div>
         )}
       </div>
 
-      {uploadError && <p className="text-xs text-red-600 dark:text-red-400">{uploadError}</p>}
+      {uploadError && <p className="text-xs text-score-low">{uploadError}</p>}
 
       <input
         ref={inputRef}

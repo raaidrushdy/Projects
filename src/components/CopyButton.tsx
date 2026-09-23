@@ -11,9 +11,15 @@ function CopyIcon() {
   );
 }
 
-function CheckIcon() {
+function CheckIcon({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      className={`h-4 w-4 ${className}`}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
     </svg>
   );
@@ -36,9 +42,9 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium text-neutral-700 transition hover:bg-black/5 dark:border-white/15 dark:text-neutral-200 dark:hover:bg-white/10"
+      className="inline-flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
     >
-      {copied ? <CheckIcon /> : <CopyIcon />}
+      {copied ? <CheckIcon className="text-score-high" /> : <CopyIcon />}
       {copied ? "Copied!" : label}
     </button>
   );

@@ -61,9 +61,29 @@
   --color-score-high: var(--score-high);
   --color-score-mid: var(--score-mid);
   --color-score-low: var(--score-low);
-  --font-sans: var(--font-manrope);
-  --font-serif: var(--font-source-serif);
-  --font-display: var(--font-fredoka);
+  /* next/font already generates a metrics-matched local fallback per family
+     (e.g. "Fredoka Fallback"); the trailing generic keyword is a last-resort
+     safety net if a font fails to load at all, so rendering degrades to a
+     sane system font rather than the browser default serif. */
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, serif;
+  --font-display: var(--font-fredoka), system-ui, sans-serif;
+}
+
+/* scrollbar-gutter reserves space for a vertical scrollbar whether or not one
+   is showing, so content doesn't shift width when a page grows past the
+   viewport (Windows shows a scrollbar by default; Mac doesn't). */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* 100dvh accounts for Safari's address bar resizing the visual viewport on
+   scroll; the 100vh line first is a fallback for browsers without dvh
+   support. */
+html,
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 body {

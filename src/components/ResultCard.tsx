@@ -46,7 +46,7 @@ export function ResultCard({ title, text, filename, monospace, note }: ResultCar
           <button
             type="button"
             onClick={() => downloadTextFile(filename, text)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
           >
             <DownloadIcon />
             Download

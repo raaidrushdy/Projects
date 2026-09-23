@@ -38,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${manrope.variable} ${sourceSerif.variable} ${fredoka.variable} h-full antialiased`}
+      className={`${manrope.variable} ${sourceSerif.variable} ${fredoka.variable} antialiased`}
     >
       <head>
         {/* Sets data-theme before first paint (localStorage, else system
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             constant, never user input. */}
         <script>{THEME_INIT_SCRIPT}</script>
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="flex flex-col">
         {children}
         <FeedbackFooter />
         <SpeedInsights />

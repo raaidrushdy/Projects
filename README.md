@@ -1,7 +1,7 @@
 # Resumate
 
-Paste your resume and a job posting, get back a resume tailored to that job plus a
-matching cover letter — in seconds.
+Upload or paste your resume and a job posting, get back a resume tailored to that job
+plus a matching cover letter — in seconds.
 
 ## Why
 
@@ -42,8 +42,13 @@ posting's language, without inventing new facts.
 
 ## How it works
 
-- `src/app/page.tsx` — the UI: two textareas (resume, job description), a submit button,
-  and a results view with copy/download for the tailored resume and cover letter.
+- `src/app/page.tsx` — the UI: a resume field (drag-and-drop upload or paste), a job
+  description textarea, a submit button, and a results view with copy/download for the
+  tailored resume and cover letter.
+- `src/components/ResumeField.tsx` — the resume input: drag-and-drop or click-to-browse
+  file upload (PDF, `.docx`, `.tex`/`.txt`), falling back to a plain paste-in textarea.
+- `src/app/api/extract-resume/route.ts` — server route that extracts plain text from an
+  uploaded PDF (`pdf-parse`) or Word doc (`mammoth`); `.tex`/`.txt` files are read as-is.
 - `src/app/api/tailor/route.ts` — server route that calls the Claude API and returns
   `{ tailoredResume, coverLetter }` as JSON.
 - `src/lib/usage.ts` — tracks usage in `localStorage` per browser, purely as a sanity

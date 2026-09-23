@@ -48,6 +48,10 @@ export default function Home() {
   const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [result, setResult] = useState<TailorResult | null>(null);
+  // Snapshot of the resume text a result was drafted from — kept separate
+  // from the live `resume` field so the redline view stays correct even if
+  // the user edits the field again after a result comes back.
+  const [submittedResume, setSubmittedResume] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const remaining = useSyncExternalStore(subscribeToUsage, getRemaining, getServerRemaining);
@@ -63,12 +67,13 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setResult(null);
+    const resumeAtSubmit = resume;
 
     try {
       const response = await fetch("/api/tailor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume, jobDescription }),
+        body: JSON.stringify({ resume: resumeAtSubmit, jobDescription }),
       });
       const data = (await parseJsonResponse(response)) as Partial<TailorResult> & {
         error?: string;
@@ -79,6 +84,7 @@ export default function Home() {
       }
 
       setResult(data as TailorResult);
+      setSubmittedResume(resumeAtSubmit);
       recordUse();
     } catch (err) {
       setError(err instanceof Error ? err.message : GENERIC_ERROR);
@@ -187,6 +193,7 @@ export default function Home() {
               filename={result.isLatex ? "tailored-resume.tex" : "tailored-resume.txt"}
               monospace={result.isLatex}
               note={result.isLatex ? "LaTeX source — paste into Overleaf or compile locally." : undefined}
+              originalText={submittedResume}
             />
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>

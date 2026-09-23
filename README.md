@@ -1,4 +1,4 @@
-# Resumate
+# Redrafted
 
 Upload or paste your resume and a job posting, get back a resume tailored to that job
 plus a matching cover letter — in seconds.
@@ -6,7 +6,7 @@ plus a matching cover letter — in seconds.
 ## Why
 
 Tailoring a resume to every job posting is tedious but it meaningfully improves response
-rates, so people either skip it or spend an hour doing it by hand. Resumate automates the
+rates, so people either skip it or spend an hour doing it by hand. Redrafted automates the
 rewrite with Claude: it reorders and rephrases your existing experience to match the
 posting's language, without inventing new facts.
 

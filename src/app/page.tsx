@@ -99,7 +99,7 @@ export default function Home() {
             <LogoMark />
           </div>
           <div className="flex flex-col gap-2">
-            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Resumate</h1>
+            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">Redrafted</h1>
             <p className="mx-auto max-w-md text-muted">
               Upload or paste your resume and a job posting — get a tailored resume and cover
               letter back in seconds.

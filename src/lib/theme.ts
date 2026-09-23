@@ -1,7 +1,7 @@
 export type Theme = "light" | "dark";
 
-const STORAGE_KEY = "resumate_theme";
-const CHANGE_EVENT = "resumate-theme-change";
+const STORAGE_KEY = "redrafted_theme";
+const CHANGE_EVENT = "redrafted-theme-change";
 
 /** Inlined verbatim into a <script> in <head> so the theme applies before first paint. */
 export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.dataset.theme=t;}catch(e){}})();`;

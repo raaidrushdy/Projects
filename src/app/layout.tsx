@@ -27,7 +27,7 @@ const fredoka = Fredoka({
 });
 
 export const metadata: Metadata = {
-  title: "Resumate — Tailor your resume in seconds",
+  title: "Redrafted — Tailor your resume in seconds",
   description:
     "Paste your resume and a job posting to get an AI-tailored resume and cover letter.",
 };

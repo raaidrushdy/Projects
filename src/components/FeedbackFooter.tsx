@@ -1,6 +1,6 @@
 const FEEDBACK_EMAIL = "raaidrushdy@gmail.com";
 const FEEDBACK_MAILTO = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(
-  "Resumate feedback",
+  "Redrafted feedback",
 )}`;
 
 export function FeedbackFooter() {

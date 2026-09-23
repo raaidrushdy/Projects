@@ -28,14 +28,20 @@ interface ResultCardProps {
   title: string;
   text: string;
   filename: string;
+  /** LaTeX source reads as code, not prose — monospace instead of the document serif. */
+  monospace?: boolean;
+  note?: string;
 }
 
-export function ResultCard({ title, text, filename }: ResultCardProps) {
+export function ResultCard({ title, text, filename, monospace, note }: ResultCardProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-        <div className="flex gap-2">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          {note && <p className="text-xs text-muted">{note}</p>}
+        </div>
+        <div className="flex shrink-0 gap-2">
           <CopyButton text={text} label="Copy" />
           <button
             type="button"
@@ -49,7 +55,9 @@ export function ResultCard({ title, text, filename }: ResultCardProps) {
       </div>
       {/* Deliberately paper-like rather than another UI card: this is the
           document the user is about to submit somewhere, not app chrome. */}
-      <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-black/10 bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm dark:border-white/10">
+      <pre
+        className={`max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-black/10 bg-surface p-5 text-sm leading-relaxed shadow-sm dark:border-white/10 ${monospace ? "font-mono" : "font-serif"}`}
+      >
         {text}
       </pre>
     </div>

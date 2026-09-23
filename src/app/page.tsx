@@ -13,6 +13,7 @@ interface TailorResult {
   redFlags: string[];
   tailoredResume: string;
   coverLetter: string;
+  isLatex: boolean;
 }
 
 const GENERIC_ERROR = "The tailoring request failed. Try again in a moment.";
@@ -160,7 +161,13 @@ export default function Home() {
               missingKeywords={result.missingKeywords}
               redFlags={result.redFlags}
             />
-            <ResultCard title="Tailored resume" text={result.tailoredResume} filename="tailored-resume.txt" />
+            <ResultCard
+              title="Tailored resume"
+              text={result.tailoredResume}
+              filename={result.isLatex ? "tailored-resume.tex" : "tailored-resume.txt"}
+              monospace={result.isLatex}
+              note={result.isLatex ? "LaTeX source — paste into Overleaf or compile locally." : undefined}
+            />
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>
         )}

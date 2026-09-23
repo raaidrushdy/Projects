@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
+import { looksLikeLatex } from "@/lib/latex";
 
 export const runtime = "nodejs";
 // Adaptive thinking + a 16k output budget can comfortably exceed the platform's
@@ -69,6 +70,29 @@ export async function POST(request: Request) {
   }
 
   const client = new Anthropic({ apiKey });
+  const isLatex = looksLikeLatex(resume);
+
+  const rewriteInstruction = isLatex
+    ? "2. The original resume is LaTeX source. Edit it in place: reword bullet " +
+      "content, reorder items or sections where it helps the match, and work in " +
+      "the missing keywords wherever truthful — but preserve the document's " +
+      "existing structure, preamble, packages, and custom commands exactly. " +
+      "Where the original supports it, phrase bullets as 'accomplished X, as " +
+      "measured by Y, by doing Z' — but never invent a metric, employer, title, " +
+      "or date that isn't in the original; if there's no real number to cite, " +
+      "keep the bullet qualitative rather than fabricate one. tailoredResume must " +
+      "be the ENTIRE document from \\documentclass through \\end{document} with " +
+      "your edits applied — valid, compilable LaTeX, not a fragment, not rebuilt " +
+      "from scratch, no markdown code fences, no commentary outside the source.\n"
+    : "2. Rewrite the resume to close those gaps: naturally work in the missing " +
+      "keywords wherever truthful, and fix the red flags. Where the original resume " +
+      "supports it, phrase bullets as 'accomplished X, as measured by Y, by doing Z' " +
+      "— but never invent a metric, employer, title, or date that isn't in the " +
+      "original; if there's no real number to cite, keep the bullet qualitative " +
+      "rather than fabricate one. The original resume text may come from a PDF or " +
+      "Word doc, so it can contain stray formatting artifacts or layout whitespace " +
+      "— read through those to the actual content, and output the tailored resume " +
+      "as clean plain text.\n";
 
   try {
     const message = await client.messages.parse({
@@ -82,24 +106,17 @@ export async function POST(request: Request) {
         "description (0-100), list up to 5 important keywords/skills the posting " +
         "emphasizes that the original resume doesn't mention, and up to 3 specific red " +
         "flags a hiring manager would notice in the first 10 seconds (e.g. no measurable " +
-        "impact, buried relevant experience, jargon mismatch with the posting).\n" +
-        "2. Rewrite the resume to close those gaps: naturally work in the missing " +
-        "keywords wherever truthful, and fix the red flags. Where the original resume " +
-        "supports it, phrase bullets as 'accomplished X, as measured by Y, by doing Z' " +
-        "— but never invent a metric, employer, title, or date that isn't in the " +
-        "original; if there's no real number to cite, keep the bullet qualitative " +
-        "rather than fabricate one.\n" +
+        "impact, buried relevant experience, jargon mismatch with the posting). Read " +
+        "through any markup (LaTeX commands, PDF/Word extraction artifacts) to the " +
+        "actual content for this analysis.\n" +
+        rewriteInstruction +
         "3. Re-read your rewrite as an ATS filter and as a hiring manager skimming 200 " +
         "resumes in one sitting — if any section would still get skipped, revise it.\n" +
         "4. Write a concise, specific cover letter (under 350 words) for the same " +
-        "posting.\n\n" +
-        "The original resume text may come from a PDF, Word doc, or LaTeX source, so it " +
-        "can contain stray formatting artifacts, layout whitespace, or LaTeX commands — " +
-        "read through those to the actual content, and output the tailored resume as " +
-        "clean plain text regardless of the input format. Report matchScore, " +
-        "missingKeywords, and redFlags for the ORIGINAL resume (step 1, before your " +
-        "rewrite) so the user can see what was wrong and what you fixed — not a " +
-        "re-score of your own output.",
+        "posting, as plain text.\n\n" +
+        "Report matchScore, missingKeywords, and redFlags for the ORIGINAL resume " +
+        "(step 1, before your rewrite) so the user can see what was wrong and what you " +
+        "fixed — not a re-score of your own output.",
       messages: [
         {
           role: "user",
@@ -117,7 +134,7 @@ export async function POST(request: Request) {
       throw new Error("Model response did not match the expected schema");
     }
 
-    return NextResponse.json(message.parsed_output);
+    return NextResponse.json({ ...message.parsed_output, isLatex });
   } catch (error) {
     console.error("Tailoring failed:", error);
     return NextResponse.json(

@@ -50,7 +50,11 @@ posting's language, without inventing new facts.
 - `src/app/api/extract-resume/route.ts` — server route that extracts plain text from an
   uploaded PDF (`pdf-parse`) or Word doc (`mammoth`); `.tex`/`.txt` files are read as-is.
 - `src/app/api/tailor/route.ts` — server route that calls the Claude API and returns
-  `{ tailoredResume, coverLetter }` as JSON.
+  `{ tailoredResume, coverLetter, isLatex, ... }` as JSON. When the resume text is
+  detected as LaTeX source (`src/lib/latex.ts`), the model edits it in place — preserving
+  the document's structure/packages/commands and returning valid, compilable LaTeX —
+  instead of flattening it to plain text. There's no server-side LaTeX compilation; the
+  output is source the user pastes into Overleaf or compiles locally.
 - `src/lib/usage.ts` — tracks usage in `localStorage` per browser, purely as a sanity
   cap against runaway API cost (resets if storage is cleared; not an entitlement system).
 

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 
@@ -10,22 +12,10 @@ interface TailorRequestBody {
   jobDescription?: string;
 }
 
-interface TailorResult {
-  tailoredResume: string;
-  coverLetter: string;
-}
-
-function extractJson(text: string): TailorResult {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) {
-    throw new Error("Model response did not contain JSON");
-  }
-  const parsed = JSON.parse(match[0]);
-  if (typeof parsed.tailoredResume !== "string" || typeof parsed.coverLetter !== "string") {
-    throw new Error("Model response JSON missing expected fields");
-  }
-  return { tailoredResume: parsed.tailoredResume, coverLetter: parsed.coverLetter };
-}
+const TailorResultSchema = z.object({
+  tailoredResume: z.string(),
+  coverLetter: z.string(),
+});
 
 export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -63,7 +53,7 @@ export async function POST(request: Request) {
   const client = new Anthropic({ apiKey });
 
   try {
-    const message = await client.messages.create({
+    const message = await client.messages.parse({
       model: "claude-sonnet-5",
       max_tokens: 4096,
       system:
@@ -75,9 +65,7 @@ export async function POST(request: Request) {
         "from a PDF, Word doc, or LaTeX source, so it can contain stray formatting " +
         "artifacts, layout whitespace, or LaTeX commands — read through those to the " +
         "actual content and output the tailored resume as clean plain text regardless " +
-        "of the input format. Respond with ONLY a JSON object of the exact shape " +
-        '{"tailoredResume": string, "coverLetter": string}, with no markdown code ' +
-        "fences and no other text before or after the JSON.",
+        "of the input format.",
       messages: [
         {
           role: "user",
@@ -86,18 +74,19 @@ export async function POST(request: Request) {
             `Original resume:\n"""\n${resume}\n"""\n\n` +
             "Tailor the resume to this job description (reorder, re-emphasize, and " +
             "rephrase existing bullet points/skills to match the posting's language and " +
-            "priorities) and write a matching cover letter. Return only the JSON object.",
+            "priorities) and write a matching cover letter.",
         },
       ],
+      output_config: {
+        format: zodOutputFormat(TailorResultSchema),
+      },
     });
 
-    const textBlock = message.content.find((block) => block.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      throw new Error("No text content in model response");
+    if (!message.parsed_output) {
+      throw new Error("Model response did not match the expected schema");
     }
 
-    const result = extractJson(textBlock.text);
-    return NextResponse.json(result);
+    return NextResponse.json(message.parsed_output);
   } catch (error) {
     console.error("Tailoring failed:", error);
     return NextResponse.json(

@@ -1,4 +1,7 @@
-export const FREE_TIER_LIMIT = 3;
+// Billing isn't wired up yet — this app is free for everyone during the testing
+// phase. The cap here is just a sanity ceiling against runaway API cost from a
+// single browser, not a paywall.
+export const FREE_TIER_LIMIT = 30;
 const STORAGE_KEY = "resumate_free_uses";
 const CHANGE_EVENT = "resumate-usage-change";
 

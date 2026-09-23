@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { parseJsonResponse } from "@/lib/api";
 
 const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".tex", ".txt"];
 
@@ -53,13 +54,13 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch("/api/extract-resume", { method: "POST", body: formData });
-      const data = await response.json();
+      const data = (await parseJsonResponse(response)) as { text?: string; error?: string };
 
       if (!response.ok) {
-        throw new Error(data?.error ?? "Couldn't read that file.");
+        throw new Error(data.error ?? "Couldn't read that file.");
       }
 
-      onChange(data.text as string);
+      onChange(data.text ?? "");
       setFileName(file.name);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Couldn't read that file.");

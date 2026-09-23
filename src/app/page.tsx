@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { parseJsonResponse } from "@/lib/api";
+import { MatchAnalysis } from "@/components/MatchAnalysis";
 import { ResultCard } from "@/components/ResultCard";
 import { ResumeField } from "@/components/ResumeField";
 import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
 
 interface TailorResult {
+  matchScore: number;
+  missingKeywords: string[];
+  redFlags: string[];
   tailoredResume: string;
   coverLetter: string;
 }
@@ -63,10 +68,12 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resume, jobDescription }),
       });
-      const data = await response.json();
+      const data = (await parseJsonResponse(response)) as Partial<TailorResult> & {
+        error?: string;
+      };
 
       if (!response.ok) {
-        throw new Error(data?.error ?? "Something went wrong. Please try again.");
+        throw new Error(data.error ?? "Something went wrong. Please try again.");
       }
 
       setResult(data as TailorResult);
@@ -155,6 +162,11 @@ export default function Home() {
 
         {result && (
           <section className="flex flex-col gap-6">
+            <MatchAnalysis
+              matchScore={result.matchScore}
+              missingKeywords={result.missingKeywords}
+              redFlags={result.redFlags}
+            />
             <ResultCard title="Tailored resume" text={result.tailoredResume} filename="tailored-resume.txt" />
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useMemo, useRef, useState, type ChangeEvent, type DragEvent, type UIEvent } from "react";
 import { parseJsonResponse } from "@/lib/api";
 
 const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".tex", ".txt"];
+const MIN_GUTTER_LINES = 12;
 
 interface ResumeFieldProps {
   value: string;
@@ -40,6 +41,12 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
+
+  const lineCount = useMemo(
+    () => Math.max(value.split("\n").length, MIN_GUTTER_LINES),
+    [value],
+  );
 
   async function uploadFile(file: File) {
     if (!isAcceptedFile(file)) {
@@ -82,6 +89,12 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
     if (file) void uploadFile(file);
   }
 
+  function handleTextareaScroll(event: UIEvent<HTMLTextAreaElement>) {
+    if (gutterRef.current) {
+      gutterRef.current.scrollTop = event.currentTarget.scrollTop;
+    }
+  }
+
   function clearFile() {
     setFileName(null);
     setUploadError(null);
@@ -105,6 +118,9 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         )}
       </div>
 
+      {/* Styled like a code editor (monospace, line-number gutter) since
+          pasted resumes are often LaTeX source; file upload still works the
+          same as any other panel. */}
       <div
         onDragOver={(event) => {
           event.preventDefault();
@@ -112,20 +128,30 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`relative rounded-xl border transition ${
-          isDragging ? "border-brand bg-brand/5" : "border-black/10 dark:border-white/15"
+        className={`relative flex overflow-hidden rounded-lg border font-mono text-sm transition ${
+          isDragging ? "border-accent bg-accent/5" : "border-line"
         }`}
       >
+        <div
+          ref={gutterRef}
+          aria-hidden="true"
+          className="select-none overflow-hidden py-3 pl-3 pr-2 text-right leading-relaxed text-muted/50"
+        >
+          {Array.from({ length: lineCount }, (_, i) => (
+            <div key={i}>{i + 1}</div>
+          ))}
+        </div>
+
         <textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder={showOverlay ? "" : ""}
+          onScroll={handleTextareaScroll}
           rows={12}
-          className="w-full resize-y rounded-xl bg-transparent p-3 text-sm outline-none focus:border-brand"
+          className="w-full resize-y bg-transparent py-3 pr-3 leading-relaxed outline-none"
         />
 
         {showOverlay && (
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-muted">
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface px-6 text-center font-sans text-muted">
             <UploadIcon />
             <p className="text-sm">
               Drop your resume here, or{" "}
@@ -142,7 +168,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         )}
 
         {isUploading && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-xl bg-surface/90 text-sm text-muted">
+          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-surface/90 font-sans text-sm text-muted">
             <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted/50 border-t-transparent" />
             Reading your file...
           </div>

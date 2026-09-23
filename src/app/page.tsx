@@ -5,6 +5,7 @@ import { parseJsonResponse } from "@/lib/api";
 import { MatchAnalysis } from "@/components/MatchAnalysis";
 import { ResultCard } from "@/components/ResultCard";
 import { ResumeField } from "@/components/ResumeField";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
 
 interface TailorResult {
@@ -40,7 +41,7 @@ function SparkleIcon() {
 }
 
 function Spinner() {
-  return <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-foreground/40 border-t-brand-foreground" />;
+  return <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-foreground/40 border-t-accent-foreground" />;
 }
 
 export default function Home() {
@@ -89,8 +90,12 @@ export default function Home() {
   return (
     <div className="flex-1">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-6 py-16 sm:py-20">
+        <div className="flex justify-end">
+          <ThemeToggle />
+        </div>
+
         <header className="flex flex-col items-center gap-4 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
             <LogoMark />
           </div>
           <div className="flex flex-col gap-2">
@@ -100,14 +105,14 @@ export default function Home() {
               letter back in seconds.
             </p>
           </div>
-          <span className="rounded-full border border-brand/30 px-3 py-1 text-xs font-medium text-brand">
+          <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
             Free while we&apos;re testing
           </span>
         </header>
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-6 rounded-3xl border border-black/10 bg-surface p-6 shadow-sm dark:border-white/10 sm:p-8"
+          className="flex flex-col gap-6 rounded-3xl border border-line bg-surface p-6 shadow-sm sm:p-8"
         >
           <div className="grid gap-6 sm:grid-cols-2">
             <ResumeField value={resume} onChange={setResume} />
@@ -119,16 +124,16 @@ export default function Home() {
                 onChange={(event) => setJobDescription(event.target.value)}
                 placeholder="Paste the job posting you're applying to..."
                 rows={12}
-                className="w-full resize-y rounded-xl border border-black/10 bg-transparent p-3 text-sm outline-none focus:border-brand dark:border-white/15"
+                className="w-full resize-y rounded-xl border border-line bg-transparent p-3 text-sm outline-none focus:border-accent"
               />
             </label>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-black/5 pt-6 dark:border-white/10">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
             <button
               type="submit"
               disabled={!canSubmit}
-              className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
             >
               {loading ? <Spinner /> : <SparkleIcon />}
               {loading ? "Tailoring..." : "Tailor my resume"}

@@ -57,6 +57,13 @@ posting's language, without inventing new facts.
   output is source the user pastes into Overleaf or compiles locally.
 - `src/lib/usage.ts` — tracks usage in `localStorage` per browser, purely as a sanity
   cap against runaway API cost (resets if storage is cleared; not an entitlement system).
+- `src/app/globals.css` + `src/lib/theme.ts` + `src/components/ThemeToggle.tsx` — the
+  light/dark theme system. Colors are CSS variables keyed off `:root[data-theme]`;
+  `THEME_INIT_SCRIPT` runs in `<head>` before first paint (localStorage, else
+  `prefers-color-scheme`) so there's no flash of the wrong theme, and the toggle persists
+  a manual override the same way. One `--accent` token per theme is the only color used
+  for primary actions/badge/focus — everything else is background/surface/foreground/
+  muted/border/score-*.
 
 ## Monetization (not yet implemented)
 

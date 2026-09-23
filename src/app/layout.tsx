@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, Manrope, Source_Serif_4 } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { FeedbackFooter } from "@/components/FeedbackFooter";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <FeedbackFooter />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Source_Serif_4 } from "next/font/google";
 import { FeedbackFooter } from "@/components/FeedbackFooter";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // Manrope for app chrome (labels, buttons, UI text) — a deliberate choice
@@ -28,8 +29,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${manrope.variable} ${sourceSerif.variable} h-full antialiased`}
     >
+      <head>
+        {/* Sets data-theme before first paint (localStorage, else system
+            preference) so there's no flash of the wrong theme. A plain text
+            child, not dangerouslySetInnerHTML — the string is a fixed
+            constant, never user input. */}
+        <script>{THEME_INIT_SCRIPT}</script>
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <FeedbackFooter />

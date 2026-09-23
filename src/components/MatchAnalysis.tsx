@@ -12,7 +12,7 @@ interface MatchAnalysisProps {
 
 export function MatchAnalysis({ matchScore, missingKeywords, redFlags }: MatchAnalysisProps) {
   return (
-    <div className="flex flex-col gap-5 border-b border-black/10 pb-6 dark:border-white/10">
+    <div className="flex flex-col gap-5 border-b border-line pb-6">
       <div className="flex items-center gap-4">
         <div
           className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-semibold ring-2 ${scoreTone(matchScore)}`}
@@ -34,7 +34,7 @@ export function MatchAnalysis({ matchScore, missingKeywords, redFlags }: MatchAn
             {missingKeywords.map((keyword) => (
               <span
                 key={keyword}
-                className="rounded-full bg-black/5 px-3 py-1 text-xs font-medium dark:bg-white/10"
+                className="rounded-full bg-foreground/5 px-3 py-1 text-xs font-medium"
               >
                 {keyword}
               </span>

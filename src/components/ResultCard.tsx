@@ -46,7 +46,7 @@ export function ResultCard({ title, text, filename, monospace, note }: ResultCar
           <button
             type="button"
             onClick={() => downloadTextFile(filename, text)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
           >
             <DownloadIcon />
             Download
@@ -56,7 +56,7 @@ export function ResultCard({ title, text, filename, monospace, note }: ResultCar
       {/* Deliberately paper-like rather than another UI card: this is the
           document the user is about to submit somewhere, not app chrome. */}
       <pre
-        className={`max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-black/10 bg-surface p-5 text-sm leading-relaxed shadow-sm dark:border-white/10 ${monospace ? "font-mono" : "font-serif"}`}
+        className={`max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 text-sm leading-relaxed shadow-sm ${monospace ? "font-mono" : "font-serif"}`}
       >
         {text}
       </pre>

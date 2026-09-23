@@ -71,9 +71,13 @@ export async function POST(request: Request) {
         "highlight the experience most relevant to a specific job posting, without " +
         "inventing new facts, employers, titles, or dates that are not present in the " +
         "original resume. You also write a concise, specific cover letter (under 350 " +
-        "words) tailored to the same job posting. Respond with ONLY a JSON object of " +
-        'the exact shape {"tailoredResume": string, "coverLetter": string}, with no ' +
-        "markdown code fences and no other text before or after the JSON.",
+        "words) tailored to the same job posting. The original resume text may come " +
+        "from a PDF, Word doc, or LaTeX source, so it can contain stray formatting " +
+        "artifacts, layout whitespace, or LaTeX commands — read through those to the " +
+        "actual content and output the tailored resume as clean plain text regardless " +
+        "of the input format. Respond with ONLY a JSON object of the exact shape " +
+        '{"tailoredResume": string, "coverLetter": string}, with no markdown code ' +
+        "fences and no other text before or after the JSON.",
       messages: [
         {
           role: "user",

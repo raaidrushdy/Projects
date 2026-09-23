@@ -128,8 +128,8 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`relative flex overflow-hidden rounded-lg border font-mono text-sm transition ${
-          isDragging ? "border-accent bg-accent/5" : "border-line"
+        className={`relative flex overflow-hidden rounded-lg bg-surface font-mono text-sm shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40 ${
+          isDragging ? "ring-2 ring-accent bg-accent/5" : ""
         }`}
       >
         <div

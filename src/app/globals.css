@@ -6,10 +6,15 @@
  * layout.tsx (reads localStorage, falls back to prefers-color-scheme) so
  * there's no flash of the wrong theme, and toggled at runtime by
  * ThemeToggle/src/lib/theme.ts. One accent color per theme, used only for
- * primary actions, the badge, and focus states — never as decoration.
+ * primary actions, the badge, and focus states — never as decoration. Three
+ * surface tones give nested cards depth without borders doing all the work:
+ * background (page) -> panel (the workspace card wrapping the inputs) ->
+ * surface (the inputs themselves, and standalone cards like the results —
+ * brightest, "paper" tone).
  */
 :root {
   --background: #f7f6f3;
+  --panel: #eeece5;
   --surface: #ffffff;
   --foreground: #1a1a18;
   --muted: #6b6b66;
@@ -28,7 +33,8 @@
 
 :root[data-theme="dark"] {
   --background: #0d0f12;
-  --surface: #16181c;
+  --panel: #17191d;
+  --surface: #1f2226;
   --foreground: #e8e8e6;
   --muted: #9a9a96;
   --line: #2a2c30;
@@ -45,6 +51,7 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-panel: var(--panel);
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -56,6 +63,7 @@
   --color-score-low: var(--score-low);
   --font-sans: var(--font-manrope);
   --font-serif: var(--font-source-serif);
+  --font-display: var(--font-fredoka);
 }
 
 body {

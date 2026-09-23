@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { MatchAnalysis } from "@/components/MatchAnalysis";
 import { ResultCard } from "@/components/ResultCard";
 import { ResumeField } from "@/components/ResumeField";
 import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
 
 interface TailorResult {
+  matchScore: number;
+  missingKeywords: string[];
+  redFlags: string[];
   tailoredResume: string;
   coverLetter: string;
 }
@@ -155,6 +159,11 @@ export default function Home() {
 
         {result && (
           <section className="flex flex-col gap-6">
+            <MatchAnalysis
+              matchScore={result.matchScore}
+              missingKeywords={result.missingKeywords}
+              redFlags={result.redFlags}
+            />
             <ResultCard title="Tailored resume" text={result.tailoredResume} filename="tailored-resume.txt" />
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>

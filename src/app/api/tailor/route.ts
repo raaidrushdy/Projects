@@ -13,6 +13,21 @@ interface TailorRequestBody {
 }
 
 const TailorResultSchema = z.object({
+  matchScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe("How well the ORIGINAL resume (before rewriting) matches the job description, 0-100."),
+  missingKeywords: z
+    .array(z.string())
+    .max(5)
+    .describe("Up to 5 skills/terms the job description emphasizes that the ORIGINAL resume is missing."),
+  redFlags: z
+    .array(z.string())
+    .max(3)
+    .describe(
+      "Up to 3 short, specific issues a hiring manager would notice in the ORIGINAL resume within 10 seconds.",
+    ),
   tailoredResume: z.string(),
   coverLetter: z.string(),
 });
@@ -55,26 +70,39 @@ export async function POST(request: Request) {
   try {
     const message = await client.messages.parse({
       model: "claude-sonnet-5",
-      max_tokens: 4096,
+      max_tokens: 16000,
+      thinking: { type: "adaptive" },
       system:
-        "You are an expert resume writer and career coach. You rewrite resumes to " +
-        "highlight the experience most relevant to a specific job posting, without " +
-        "inventing new facts, employers, titles, or dates that are not present in the " +
-        "original resume. You also write a concise, specific cover letter (under 350 " +
-        "words) tailored to the same job posting. The original resume text may come " +
-        "from a PDF, Word doc, or LaTeX source, so it can contain stray formatting " +
-        "artifacts, layout whitespace, or LaTeX commands — read through those to the " +
-        "actual content and output the tailored resume as clean plain text regardless " +
-        "of the input format.",
+        "You are an expert resume writer and a senior technical recruiter for the " +
+        "exact company/role in the job description below. Work through this in order:\n\n" +
+        "1. As the recruiter, score how well the ORIGINAL resume matches the job " +
+        "description (0-100), list up to 5 important keywords/skills the posting " +
+        "emphasizes that the original resume doesn't mention, and up to 3 specific red " +
+        "flags a hiring manager would notice in the first 10 seconds (e.g. no measurable " +
+        "impact, buried relevant experience, jargon mismatch with the posting).\n" +
+        "2. Rewrite the resume to close those gaps: naturally work in the missing " +
+        "keywords wherever truthful, and fix the red flags. Where the original resume " +
+        "supports it, phrase bullets as 'accomplished X, as measured by Y, by doing Z' " +
+        "— but never invent a metric, employer, title, or date that isn't in the " +
+        "original; if there's no real number to cite, keep the bullet qualitative " +
+        "rather than fabricate one.\n" +
+        "3. Re-read your rewrite as an ATS filter and as a hiring manager skimming 200 " +
+        "resumes in one sitting — if any section would still get skipped, revise it.\n" +
+        "4. Write a concise, specific cover letter (under 350 words) for the same " +
+        "posting.\n\n" +
+        "The original resume text may come from a PDF, Word doc, or LaTeX source, so it " +
+        "can contain stray formatting artifacts, layout whitespace, or LaTeX commands — " +
+        "read through those to the actual content, and output the tailored resume as " +
+        "clean plain text regardless of the input format. Report matchScore, " +
+        "missingKeywords, and redFlags for the ORIGINAL resume (step 1, before your " +
+        "rewrite) so the user can see what was wrong and what you fixed — not a " +
+        "re-score of your own output.",
       messages: [
         {
           role: "user",
           content:
             `Job description:\n"""\n${jobDescription}\n"""\n\n` +
-            `Original resume:\n"""\n${resume}\n"""\n\n` +
-            "Tailor the resume to this job description (reorder, re-emphasize, and " +
-            "rephrase existing bullet points/skills to match the posting's language and " +
-            "priorities) and write a matching cover letter.",
+            `Original resume:\n"""\n${resume}\n"""`,
         },
       ],
       output_config: {

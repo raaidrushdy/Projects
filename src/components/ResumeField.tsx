@@ -130,7 +130,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`relative flex overflow-hidden rounded-lg bg-surface font-mono text-base shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40 ${
+        className={`relative flex h-80 overflow-hidden rounded-lg bg-surface font-mono text-base shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40 ${
           isDragging ? "ring-2 ring-accent bg-accent/5" : ""
         }`}
       >
@@ -148,10 +148,9 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onScroll={handleTextareaScroll}
-          rows={12}
           required
           aria-labelledby="resume-field-label"
-          className="w-full resize-y bg-transparent py-3 pr-3 leading-relaxed outline-none"
+          className="w-full resize-none overflow-y-auto bg-transparent py-3 pr-3 leading-relaxed outline-none"
         />
 
         {showOverlay && (

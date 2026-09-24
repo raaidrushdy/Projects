@@ -140,9 +140,8 @@ export default function Home() {
                 value={jobDescription}
                 onChange={(event) => setJobDescription(event.target.value)}
                 placeholder="Paste the job posting you're applying to..."
-                rows={12}
                 required
-                className="w-full resize-y rounded-xl bg-surface p-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
+                className="h-80 w-full resize-none overflow-y-auto rounded-xl bg-surface p-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
               />
             </label>
           </div>

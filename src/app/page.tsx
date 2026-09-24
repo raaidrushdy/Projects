@@ -3,11 +3,14 @@
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { parseJsonResponse } from "@/lib/api";
 import { EXAMPLE_JOB_DESCRIPTION, EXAMPLE_RESUME } from "@/lib/example";
+import { Faq } from "@/components/Faq";
 import { Header } from "@/components/Header";
+import { HowItWorks } from "@/components/HowItWorks";
 import { JobDescriptionField } from "@/components/JobDescriptionField";
 import { ResultsTabs } from "@/components/ResultsTabs";
 import { ResumeField } from "@/components/ResumeField";
 import { TailoringProgress } from "@/components/TailoringProgress";
+import { TrustPrivacy } from "@/components/TrustPrivacy";
 import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
 
 interface TailorResult {
@@ -101,7 +104,7 @@ export default function Home() {
       <Header />
       <div className="flex-1">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-14 lg:max-w-4xl">
-          <header id="top" className="flex flex-col items-center gap-3 pt-2 text-center">
+          <div id="top" className="flex scroll-mt-24 flex-col items-center gap-3 pt-2 text-center">
             <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
               Your resume, rewritten for every job.
             </h1>
@@ -112,7 +115,7 @@ export default function Home() {
             <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
               Free while we&apos;re testing
             </span>
-          </header>
+          </div>
 
         <main className="contents">
         {loading && <TailoringProgress />}
@@ -194,6 +197,10 @@ export default function Home() {
           </form>
         )}
         </main>
+
+        <HowItWorks />
+        <TrustPrivacy />
+        <Faq />
         </div>
       </div>
     </>

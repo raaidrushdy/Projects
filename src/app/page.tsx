@@ -21,7 +21,7 @@ const GENERIC_ERROR = "The tailoring request failed. Try again in a moment.";
 
 function LogoMark() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-5 w-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-5 w-5" aria-hidden="true">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -34,7 +34,7 @@ function LogoMark() {
 
 function SparkleIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
       <path d="M12 2.5c.35 3.1 1.1 5.1 2.25 6.25S17.4 10.65 20.5 11c-3.1.35-5.1 1.1-6.25 2.25S12.35 16.4 12 19.5c-.35-3.1-1.1-5.1-2.25-6.25S6.6 11.35 3.5 11c3.1-.35 5.1-1.1 6.25-2.25S11.65 5.6 12 2.5Z" />
     </svg>
   );
@@ -133,12 +133,15 @@ export default function Home() {
             <div aria-hidden="true" className="h-px w-full bg-line md:h-auto md:w-px" />
 
             <label className="flex min-w-0 flex-1 flex-col gap-2">
-              <span className="text-sm font-medium">Job description</span>
+              <span className="text-sm font-medium">
+                Job description <span className="text-muted">(required)</span>
+              </span>
               <textarea
                 value={jobDescription}
                 onChange={(event) => setJobDescription(event.target.value)}
                 placeholder="Paste the job posting you're applying to..."
                 rows={12}
+                required
                 className="w-full resize-y rounded-xl bg-surface p-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
               />
             </label>
@@ -194,6 +197,7 @@ export default function Home() {
               monospace={result.isLatex}
               note={result.isLatex ? "LaTeX source — paste into Overleaf or compile locally." : undefined}
               originalText={submittedResume}
+              primary
             />
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>

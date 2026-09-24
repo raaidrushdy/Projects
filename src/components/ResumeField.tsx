@@ -107,7 +107,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <span id="resume-field-label" className="text-sm font-medium">
-          Your resume
+          Your resume <span className="text-muted">(required)</span>
         </span>
         {fileName && (
           <button
@@ -149,6 +149,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
           onChange={(event) => onChange(event.target.value)}
           onScroll={handleTextareaScroll}
           rows={12}
+          required
           aria-labelledby="resume-field-label"
           className="w-full resize-y bg-transparent py-3 pr-3 leading-relaxed outline-none"
         />

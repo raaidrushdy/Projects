@@ -1,27 +1,22 @@
-function scoreTone(score: number) {
-  if (score >= 75) return "text-score-high ring-score-high/30";
-  if (score >= 50) return "text-score-mid ring-score-mid/30";
-  return "text-score-low ring-score-low/30";
-}
-
 interface MatchAnalysisProps {
   matchScore: number;
   missingKeywords: string[];
   redFlags: string[];
 }
 
+/** The full before/after analysis — score, missing keywords, red flags.
+    Lives inside the Changes tab as supporting detail; the compact summary
+    bar above the tabs is what most people see by default. */
 export function MatchAnalysis({ matchScore, missingKeywords, redFlags }: MatchAnalysisProps) {
   return (
-    <div className="flex flex-col gap-5 border-b border-line pb-6">
+    <div id="missing-keywords" className="flex flex-col gap-5">
       <div className="flex items-center gap-4">
-        <div
-          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-semibold tabular-nums ring-2 ${scoreTone(matchScore)}`}
-        >
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold tabular-nums text-accent ring-2 ring-accent/30">
           {matchScore}
         </div>
         <div>
-          <h2 className="text-base font-semibold tracking-tight">Match score before tailoring</h2>
-          <p className="text-sm text-muted">
+          <h2 className="text-sm font-semibold tracking-tight">Match score before tailoring</h2>
+          <p className="text-xs text-muted">
             How well your original resume matched this posting, out of 100.
           </p>
         </div>
@@ -57,7 +52,7 @@ export function MatchAnalysis({ matchScore, missingKeywords, redFlags }: MatchAn
         </div>
       )}
 
-      <p className="text-xs text-muted">All of this is already fixed in the tailored resume below.</p>
+      <p className="text-xs text-muted">Already addressed in the tailored resume.</p>
     </div>
   );
 }

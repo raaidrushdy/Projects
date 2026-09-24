@@ -1,7 +1,7 @@
 const STEPS = [
   { n: "01", text: "Paste your resume." },
   { n: "02", text: "Add the job description." },
-  { n: "03", text: "Get a tailored resume and cover letter." },
+  { n: "03", text: "Get your tailored resume." },
 ];
 
 export function HowItWorks() {
@@ -12,7 +12,7 @@ export function HowItWorks() {
         {STEPS.map((step) => (
           <div key={step.n} className="flex items-start gap-3">
             <span className="font-mono text-sm text-accent">{step.n}</span>
-            <p className="text-sm text-muted">{step.text}</p>
+            <p className="whitespace-nowrap text-sm text-muted">{step.text}</p>
           </div>
         ))}
       </div>

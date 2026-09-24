@@ -31,6 +31,12 @@ export function TrustPrivacy() {
           </li>
         ))}
       </ul>
+      <a
+        href="/privacy"
+        className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-accent underline decoration-accent/30 underline-offset-2 transition hover:decoration-accent"
+      >
+        Read the full privacy policy
+      </a>
     </section>
   );
 }

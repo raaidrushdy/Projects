@@ -58,15 +58,24 @@ async function getWorker(): Promise<Worker> {
   return workerPromise;
 }
 
+export const PDF_TIMEOUT_MESSAGE =
+  "Couldn't compile a preview. Your LaTeX is still ready to copy or download.";
+
 /** Runs one LaTeX source through pdftex. Rejects only on infrastructure
     failure (engine wouldn't load); a LaTeX compile error is a normal
-    `{ success: false }` result with the engine's log attached. */
-export async function compileLatexToPdf(source: string): Promise<CompileResult> {
+    `{ success: false }` result with the engine's log attached. `timeoutMs`
+    resolves the same way rather than leaving the caller waiting forever —
+    the worker's own eventual response (if it arrives late) is ignored. */
+export async function compileLatexToPdf(source: string, timeoutMs?: number): Promise<CompileResult> {
   const worker = await getWorker();
 
   return new Promise<CompileResult>((resolve) => {
+    let settled = false;
+
     function onMessage(event: MessageEvent) {
-      if (event.data?.type !== "finish") return;
+      if (event.data?.type !== "finish" || settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
       worker.removeEventListener("message", onMessage);
       const value = event.data.value as { success: boolean; url: string | null; log: string; message?: string };
       resolve({
@@ -76,6 +85,16 @@ export async function compileLatexToPdf(source: string): Promise<CompileResult> 
         message: value.message,
       });
     }
+
+    const timer = timeoutMs
+      ? setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          worker.removeEventListener("message", onMessage);
+          resolve({ success: false, log: "", message: PDF_TIMEOUT_MESSAGE });
+        }, timeoutMs)
+      : undefined;
+
     worker.addEventListener("message", onMessage);
     worker.postMessage({ type: "start", source, options: { enableUrls: false } });
   });

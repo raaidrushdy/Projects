@@ -12,14 +12,17 @@ export function RedlineView({ before, after }: RedlineViewProps) {
   const ops = diffWords(before, after);
 
   return (
-    <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm">
+    <pre
+      tabIndex={0}
+      className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+    >
       {ops.map((op, i) => {
         if (op.type === "equal") return <span key={i}>{op.text}</span>;
         if (op.type === "remove") {
           return (
             <del
               key={i}
-              className="text-redline-remove no-underline line-through decoration-1 opacity-75"
+              className="text-redline-remove no-underline line-through decoration-1"
             >
               <span className="sr-only">Removed: </span>
               {op.text}

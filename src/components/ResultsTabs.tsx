@@ -5,7 +5,9 @@ import { CopyButton } from "@/components/CopyButton";
 import { MatchAnalysis } from "@/components/MatchAnalysis";
 import { RedlineView } from "@/components/RedlineView";
 import { downloadTextFile, downloadUrl } from "@/lib/download";
-import { compileLatexToPdf } from "@/lib/pdftexEngine";
+import { compileLatexToPdf, PDF_TIMEOUT_MESSAGE } from "@/lib/pdftexEngine";
+
+const PDF_TIMEOUT_MS = 20000;
 
 type TabId = "resume" | "cover-letter" | "changes";
 
@@ -38,6 +40,48 @@ function DownloadIcon() {
   );
 }
 
+/** Score + "X of Y key skills covered" + a link into the Changes tab.
+    Replaces the old full-size match-score block as the default, always-
+    visible summary; the full detail (score circle, keyword chips, red
+    flags) now lives inside the Changes tab. Neutral/indigo only — no
+    score-banded color, on purpose. */
+function SummaryBar({
+  matchScore,
+  missingKeywords,
+  onViewMissingKeywords,
+}: {
+  matchScore: number;
+  missingKeywords: string[];
+  onViewMissingKeywords: () => void;
+}) {
+  const total = missingKeywords.length;
+
+  return (
+    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-panel px-4 py-3 text-sm">
+      <span className="font-semibold tabular-nums text-foreground">
+        {matchScore}
+        <span className="font-normal text-muted"> / 100 match</span>
+      </span>
+      <span aria-hidden="true" className="h-4 w-px bg-line" />
+      <span className="text-muted">
+        {total > 0 ? `${total} of ${total} key skills covered` : "All key skills already covered"}
+      </span>
+      {total > 0 && (
+        <>
+          <span aria-hidden="true" className="h-4 w-px bg-line" />
+          <button
+            type="button"
+            onClick={onViewMissingKeywords}
+            className="inline-flex min-h-11 items-center font-medium text-accent underline decoration-accent/30 underline-offset-2 transition hover:decoration-accent"
+          >
+            View missing keywords
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 type PdfState =
   | { status: "compiling" }
   | { status: "ready"; url: string }
@@ -63,26 +107,21 @@ export function ResultsTabs({
     if (!isLatex) return;
     let cancelled = false;
 
-    compileLatexToPdf(tailoredResume)
+    compileLatexToPdf(tailoredResume, PDF_TIMEOUT_MS)
       .then((result) => {
         if (cancelled) return;
         if (result.success && result.pdfUrl) {
           pdfUrlRef.current = result.pdfUrl;
           setPdf({ status: "ready", url: result.pdfUrl });
         } else {
-          setPdf({
-            status: "error",
-            message:
-              result.message ||
-              "This LaTeX didn't compile to a PDF. The source is still valid to copy or download.",
-          });
+          setPdf({ status: "error", message: result.message || PDF_TIMEOUT_MESSAGE });
         }
       })
       .catch((err) => {
         if (cancelled) return;
         setPdf({
           status: "error",
-          message: err instanceof Error ? err.message : "Couldn't load the PDF preview engine.",
+          message: err instanceof Error ? err.message : PDF_TIMEOUT_MESSAGE,
         });
       });
 
@@ -100,9 +139,23 @@ export function ResultsTabs({
     setAttempt((n) => n + 1);
   }
 
+  function viewMissingKeywords() {
+    setTab("changes");
+    requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document
+        .getElementById("missing-keywords")
+        ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    });
+  }
+
   return (
     <section className="animate-reveal flex flex-col gap-6">
-      <MatchAnalysis matchScore={matchScore} missingKeywords={missingKeywords} redFlags={redFlags} />
+      {/* The hero (and its page h1) is hidden once results exist, so this
+          keeps exactly one h1 on the page for screen-reader/document-outline
+          purposes without reintroducing a visible page title. */}
+      <h1 className="sr-only">Your tailored results</h1>
+      <SummaryBar matchScore={matchScore} missingKeywords={missingKeywords} onViewMissingKeywords={viewMissingKeywords} />
 
       <div
         role="tablist"
@@ -116,7 +169,7 @@ export function ResultsTabs({
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full px-2 text-sm font-medium transition sm:px-4 ${
+            className={`inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full px-2 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-accent/50 sm:px-4 ${
               tab === t.id ? "bg-accent text-accent-foreground" : "text-muted hover:text-foreground"
             }`}
           >
@@ -157,7 +210,10 @@ export function ResultsTabs({
 
           {isLatex ? (
             <div className="grid gap-4 lg:grid-cols-2">
-              <pre className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-mono text-sm leading-relaxed shadow-sm">
+              <pre
+                tabIndex={0}
+                className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-mono text-sm leading-relaxed shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              >
                 {tailoredResume}
               </pre>
               <div className="h-[32rem] overflow-hidden rounded-md border border-line bg-surface shadow-sm">
@@ -175,7 +231,7 @@ export function ResultsTabs({
                       onClick={retryCompile}
                       className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
                     >
-                      Try again
+                      Retry
                     </button>
                   </div>
                 )}
@@ -185,7 +241,10 @@ export function ResultsTabs({
               </div>
             </div>
           ) : (
-            <pre className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm">
+            <pre
+              tabIndex={0}
+              className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            >
               {tailoredResume}
             </pre>
           )}
@@ -202,15 +261,22 @@ export function ResultsTabs({
             value={coverLetterDraft}
             onChange={(event) => setCoverLetterDraft(event.target.value)}
             aria-label="Cover letter, editable"
+            tabIndex={0}
             className="h-[32rem] w-full resize-y rounded-md border border-line bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
           />
         </div>
       )}
 
       {tab === "changes" && (
-        <div role="tabpanel" className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold tracking-tight">What changed</h2>
-          <RedlineView before={originalResume} after={tailoredResume} />
+        <div role="tabpanel" className="flex flex-col gap-6">
+          <div className="rounded-xl border border-line bg-panel p-4 sm:p-5">
+            <MatchAnalysis matchScore={matchScore} missingKeywords={missingKeywords} redFlags={redFlags} />
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h2 className="text-lg font-semibold tracking-tight">What changed</h2>
+            <RedlineView before={originalResume} after={tailoredResume} />
+          </div>
         </div>
       )}
 

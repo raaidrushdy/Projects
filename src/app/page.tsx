@@ -104,18 +104,20 @@ export default function Home() {
       <Header />
       <div className="flex-1">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-14 lg:max-w-4xl">
-          <div id="top" className="flex scroll-mt-24 flex-col items-center gap-3 pt-2 text-center">
-            <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
-              Your resume, rewritten for every job.
-            </h1>
-            <p className="max-w-md text-muted sm:text-lg">
-              Paste your resume and the job posting. Get a tailored resume and cover letter back
-              in seconds.
-            </p>
-            <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
-              Free while we&apos;re testing
-            </span>
-          </div>
+          {!result && (
+            <div id="top" className="flex scroll-mt-24 flex-col items-center gap-3 pt-2 text-center">
+              <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
+                Your resume, rewritten for every job.
+              </h1>
+              <p className="max-w-md text-muted sm:text-lg">
+                Paste your resume and the job posting. Get a tailored resume and cover letter
+                back in seconds.
+              </p>
+              <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
+                Free while we&apos;re testing
+              </span>
+            </div>
+          )}
 
         <main className="contents">
         {loading && <TailoringProgress />}
@@ -172,7 +174,7 @@ export default function Home() {
             {outOfFreeUses && (
               <div
                 role="status"
-                className="rounded-xl border border-score-mid/40 bg-score-mid/10 p-4 text-sm text-score-mid"
+                className="rounded-xl border border-line bg-surface p-4 text-sm text-foreground"
               >
                 Message us if you want to keep testing. We&apos;ll bump it up.
               </div>

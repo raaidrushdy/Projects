@@ -15,22 +15,28 @@ export function JobDescriptionField({ value, onChange }: JobDescriptionFieldProp
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <span id="job-field-label" className="text-sm font-medium">
-          Job description <span className="text-muted">(required)</span>
-        </span>
-        <span className="text-xs tabular-nums text-muted">
-          {wordCount} {wordCount === 1 ? "word" : "words"}
-        </span>
+      <span id="job-field-label" className="text-sm font-medium">
+        Job description <span className="text-muted">(required)</span>
+      </span>
+
+      {/* Same box structure as the resume panel (toolbar strip + content
+          area inside one fixed-height box) so both panels' top and bottom
+          edges match exactly. */}
+      <div className="flex h-80 flex-col overflow-hidden rounded-lg bg-surface shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40">
+        <div className="flex min-h-11 items-center justify-end border-b border-line px-3 font-sans text-xs text-muted">
+          <span className="tabular-nums">
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
+        </div>
+        <textarea
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Paste the job posting you're applying to..."
+          required
+          aria-labelledby="job-field-label"
+          className="w-full flex-1 resize-none overflow-y-auto bg-transparent p-3 text-base leading-relaxed outline-none"
+        />
       </div>
-      <textarea
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="Paste the job posting you're applying to..."
-        required
-        aria-labelledby="job-field-label"
-        className="h-80 w-full resize-none overflow-y-auto rounded-lg bg-surface p-3 text-base leading-relaxed shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
-      />
     </div>
   );
 }

@@ -16,7 +16,7 @@ export function Footer() {
             Contact us
           </a>
           <a
-            href="#privacy"
+            href="/privacy"
             className="inline-flex min-h-11 items-center underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
           >
             Privacy

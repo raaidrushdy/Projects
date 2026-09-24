@@ -13,7 +13,14 @@ tooling, zip bundles) that aren't needed at skill-runtime.
 | `frontend-design` | [anthropics/skills](https://github.com/anthropics/skills) | Apache-2.0 (see `frontend-design/LICENSE.txt`) |
 | `webapp-testing` | [anthropics/skills](https://github.com/anthropics/skills) | Apache-2.0 (see `webapp-testing/LICENSE.txt`) |
 | `accessibility-audit`, `accessibility-diff`, `accessibility-fix`, `accessibility-inspect`, `accessibility-scan`, `shared` | [AccessLint/skills](https://github.com/AccessLint/skills) | MIT |
+| `ponytail`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`, `ponytail-review` | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | MIT |
 
 `accessibility-fix` (and rule-metadata lookups in `accessibility-audit`/`accessibility-inspect`) use the
 bundled `@accesslint/mcp` server, configured in this repo's root `.mcp.json`. `accessibility-scan` and
 `accessibility-diff` work without it — they shell out to `@accesslint/cli` directly.
+
+`ponytail`'s upstream also ships lifecycle hooks (auto-inject the ruleset every turn via
+`${CLAUDE_PLUGIN_ROOT}`) that only resolve through the real `/plugin install` flow — not wired up here,
+since this is a plain project-level skill copy. The six skills work invoked on demand
+(`/ponytail`, `/ponytail-review`, etc.); they just don't auto-activate every turn the way the full
+plugin install would.

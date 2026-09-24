@@ -37,9 +37,13 @@ interface ResultCardProps {
       monospace/LaTeX), a toggle lets the reader see the tailoring as an
       edit — the redline — instead of just the finished text. */
   originalText?: string;
+  /** The tailored resume is the product's actual deliverable; the cover
+      letter is a secondary bonus. Without a size/weight distinction the two
+      cards read as equally important, which they aren't. */
+  primary?: boolean;
 }
 
-export function ResultCard({ title, text, filename, monospace, note, originalText }: ResultCardProps) {
+export function ResultCard({ title, text, filename, monospace, note, originalText, primary }: ResultCardProps) {
   const [showChanges, setShowChanges] = useState(false);
   const canShowChanges = Boolean(originalText) && !monospace;
 
@@ -47,7 +51,11 @@ export function ResultCard({ title, text, filename, monospace, note, originalTex
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          <h2
+            className={`tracking-tight ${primary ? "text-lg font-semibold" : "text-base font-medium"}`}
+          >
+            {title}
+          </h2>
           {note && <p className="text-xs text-muted">{note}</p>}
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-2">

@@ -15,7 +15,7 @@ export function MatchAnalysis({ matchScore, missingKeywords, redFlags }: MatchAn
     <div className="flex flex-col gap-5 border-b border-line pb-6">
       <div className="flex items-center gap-4">
         <div
-          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-semibold ring-2 ${scoreTone(matchScore)}`}
+          className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-semibold tabular-nums ring-2 ${scoreTone(matchScore)}`}
         >
           {matchScore}
         </div>

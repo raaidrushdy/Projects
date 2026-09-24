@@ -194,6 +194,7 @@ export default function Home() {
               monospace={result.isLatex}
               note={result.isLatex ? "LaTeX source — paste into Overleaf or compile locally." : undefined}
               originalText={submittedResume}
+              primary
             />
             <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
           </section>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fredoka, Manrope, Source_Serif_4 } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { FeedbackFooter } from "@/components/FeedbackFooter";
+import { Footer } from "@/components/Footer";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -28,7 +28,7 @@ const fredoka = Fredoka({
 });
 
 export const metadata: Metadata = {
-  title: "Redrafted — Tailor your resume in seconds",
+  title: "Redrafted: tailor your resume in seconds",
   description:
     "Paste your resume and a job posting to get an AI-tailored resume and cover letter.",
 };
@@ -49,7 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex flex-col">
         {children}
-        <FeedbackFooter />
+        <Footer />
         <SpeedInsights />
       </body>
     </html>

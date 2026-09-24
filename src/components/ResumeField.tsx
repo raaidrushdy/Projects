@@ -9,6 +9,7 @@ const MIN_GUTTER_LINES = 12;
 interface ResumeFieldProps {
   value: string;
   onChange: (value: string) => void;
+  onLoadExample: () => void;
 }
 
 function isAcceptedFile(file: File): boolean {
@@ -16,14 +17,14 @@ function isAcceptedFile(file: File): boolean {
   return ACCEPTED_EXTENSIONS.some((ext) => name.endsWith(ext));
 }
 
-function UploadIcon() {
+function UploadIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
-      className="h-6 w-6"
+      className={className}
       aria-hidden="true"
     >
       <path
@@ -35,7 +36,7 @@ function UploadIcon() {
   );
 }
 
-export function ResumeField({ value, onChange }: ResumeFieldProps) {
+export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -101,6 +102,12 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
     onChange("");
   }
 
+  function handleLoadExample() {
+    setFileName(null);
+    setUploadError(null);
+    onLoadExample();
+  }
+
   const showOverlay = !value && !isUploading;
 
   return (
@@ -109,15 +116,33 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
         <span id="resume-field-label" className="text-sm font-medium">
           Your resume <span className="text-muted">(required)</span>
         </span>
-        {fileName && (
+        <div className="flex items-center gap-4">
+          {fileName ? (
+            <button
+              type="button"
+              onClick={clearFile}
+              className="inline-flex min-h-11 items-center text-xs text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+            >
+              {fileName} · clear
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleLoadExample}
+              className="inline-flex min-h-11 items-center text-xs text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+            >
+              Load example
+            </button>
+          )}
           <button
             type="button"
-            onClick={clearFile}
-            className="inline-flex min-h-11 items-center text-xs text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+            onClick={() => inputRef.current?.click()}
+            className="inline-flex min-h-11 items-center gap-1.5 text-xs font-medium text-muted transition hover:text-foreground"
           >
-            {fileName} · clear
+            <UploadIcon className="h-3.5 w-3.5" />
+            Upload
           </button>
-        )}
+        </div>
       </div>
 
       {/* Styled like a code editor (monospace, line-number gutter) since
@@ -166,7 +191,7 @@ export function ResumeField({ value, onChange }: ResumeFieldProps) {
                 browse files
               </button>
             </p>
-            <p className="text-xs">PDF, Word (.docx), or LaTeX (.tex) — or paste text directly</p>
+            <p className="text-xs">PDF, Word (.docx), or LaTeX (.tex). Or paste text directly.</p>
           </div>
         )}
 

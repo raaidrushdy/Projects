@@ -2,10 +2,15 @@
 
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { parseJsonResponse } from "@/lib/api";
-import { MatchAnalysis } from "@/components/MatchAnalysis";
-import { ResultCard } from "@/components/ResultCard";
+import { EXAMPLE_JOB_DESCRIPTION, EXAMPLE_RESUME } from "@/lib/example";
+import { Faq } from "@/components/Faq";
+import { Header } from "@/components/Header";
+import { HowItWorks } from "@/components/HowItWorks";
+import { JobDescriptionField } from "@/components/JobDescriptionField";
+import { ResultsTabs } from "@/components/ResultsTabs";
 import { ResumeField } from "@/components/ResumeField";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { TailoringProgress } from "@/components/TailoringProgress";
+import { TrustPrivacy } from "@/components/TrustPrivacy";
 import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
 
 interface TailorResult {
@@ -19,19 +24,6 @@ interface TailorResult {
 
 const GENERIC_ERROR = "The tailoring request failed. Try again in a moment.";
 
-function LogoMark() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-5 w-5" aria-hidden="true">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M7 3h7l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"
-      />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M14 3v4h4M9 12h6M9 15h6M9 9h2" />
-    </svg>
-  );
-}
-
 function SparkleIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
@@ -40,9 +32,6 @@ function SparkleIcon() {
   );
 }
 
-function Spinner() {
-  return <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-foreground/40 border-t-accent-foreground" />;
-}
 
 export default function Home() {
   const [resume, setResume] = useState("");
@@ -60,8 +49,7 @@ export default function Home() {
   const canSubmit =
     resume.trim().length > 0 && jobDescription.trim().length > 0 && !loading && !outOfFreeUses;
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function runTailoring() {
     if (!canSubmit) return;
 
     setLoading(true);
@@ -93,116 +81,128 @@ export default function Home() {
     }
   }
 
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    void runTailoring();
+  }
+
+  function loadExample() {
+    setResume(EXAMPLE_RESUME);
+    setJobDescription(EXAMPLE_JOB_DESCRIPTION);
+  }
+
+  function startOver() {
+    setResume("");
+    setJobDescription("");
+    setResult(null);
+    setSubmittedResume("");
+    setError(null);
+  }
+
   return (
-    <div className="flex-1">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:max-w-4xl lg:py-20">
-        <div className="flex justify-end">
-          <ThemeToggle />
-        </div>
-
-        <header className="flex flex-col items-center gap-4 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-            <LogoMark />
-          </div>
-          <div className="flex flex-col gap-2">
-            <h1 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              Redrafted
+    <>
+      <Header />
+      <div className="flex-1">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-14 lg:max-w-4xl">
+          <div id="top" className="flex scroll-mt-24 flex-col items-center gap-3 pt-2 text-center">
+            <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
+              Your resume, rewritten for every job.
             </h1>
-            <p className="mx-auto max-w-md text-muted">
-              Upload or paste your resume and a job posting — get a tailored resume and cover
-              letter back in seconds.
+            <p className="max-w-md text-muted sm:text-lg">
+              Paste your resume and the job posting. Get a tailored resume and cover letter back
+              in seconds.
             </p>
-          </div>
-          <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
-            Free while we&apos;re testing
-          </span>
-        </header>
-
-        <main className="contents">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-6 rounded-3xl border border-line bg-panel p-4 shadow-sm sm:p-6 lg:p-8"
-        >
-          <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:gap-8">
-            <div className="min-w-0 flex-1">
-              <ResumeField value={resume} onChange={setResume} />
-            </div>
-
-            {/* Horizontal on mobile (stacked column), vertical once the
-                fields sit side by side at md: and up. */}
-            <div aria-hidden="true" className="h-px w-full bg-line md:h-auto md:w-px" />
-
-            <label className="flex min-w-0 flex-1 flex-col gap-2">
-              <span className="text-sm font-medium">
-                Job description <span className="text-muted">(required)</span>
-              </span>
-              <textarea
-                value={jobDescription}
-                onChange={(event) => setJobDescription(event.target.value)}
-                placeholder="Paste the job posting you're applying to..."
-                required
-                className="h-80 w-full resize-none overflow-y-auto rounded-xl bg-surface p-3 text-base shadow-sm outline-none focus:ring-2 focus:ring-accent/40"
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {loading ? <Spinner /> : <SparkleIcon />}
-              {loading ? "Tailoring..." : "Tailor my resume"}
-            </button>
-
-            <span className="text-sm text-muted">
-              {outOfFreeUses
-                ? "You've hit today's usage cap on this browser."
-                : `${remaining} free tailoring${remaining === 1 ? "" : "s"} left on this browser`}
+            <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
+              Free while we&apos;re testing
             </span>
           </div>
 
-          {outOfFreeUses && (
-            <div
-              role="status"
-              className="rounded-xl border border-score-mid/40 bg-score-mid/10 p-4 text-sm text-score-mid"
-            >
-              Message us if you want to keep testing — we&apos;ll bump it up.
-            </div>
-          )}
+        <main className="contents">
+        {loading && <TailoringProgress />}
 
-          {error && (
-            <div
-              role="alert"
-              className="rounded-xl border border-score-low/40 bg-score-low/10 p-4 text-sm text-score-low"
-            >
-              {error}
-            </div>
-          )}
-        </form>
+        {!loading && result && (
+          <ResultsTabs
+            matchScore={result.matchScore}
+            missingKeywords={result.missingKeywords}
+            redFlags={result.redFlags}
+            tailoredResume={result.tailoredResume}
+            coverLetter={result.coverLetter}
+            isLatex={result.isLatex}
+            originalResume={submittedResume}
+            onStartOver={startOver}
+          />
+        )}
 
-        {result && (
-          <section className="animate-reveal flex flex-col gap-6">
-            <MatchAnalysis
-              matchScore={result.matchScore}
-              missingKeywords={result.missingKeywords}
-              redFlags={result.redFlags}
-            />
-            <ResultCard
-              title="Tailored resume"
-              text={result.tailoredResume}
-              filename={result.isLatex ? "tailored-resume.tex" : "tailored-resume.txt"}
-              monospace={result.isLatex}
-              note={result.isLatex ? "LaTeX source — paste into Overleaf or compile locally." : undefined}
-              originalText={submittedResume}
-              primary
-            />
-            <ResultCard title="Cover letter" text={result.coverLetter} filename="cover-letter.txt" />
-          </section>
+        {!loading && !result && (
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-6 rounded-3xl border border-line bg-panel p-4 shadow-sm sm:p-6 lg:p-8"
+          >
+            <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:gap-8">
+              <div className="min-w-0 flex-1">
+                <ResumeField value={resume} onChange={setResume} onLoadExample={loadExample} />
+              </div>
+
+              {/* Horizontal on mobile (stacked column), vertical once the
+                  fields sit side by side at md: and up. */}
+              <div aria-hidden="true" className="h-px w-full bg-line md:h-auto md:w-px" />
+
+              <div className="min-w-0 flex-1">
+                <JobDescriptionField value={jobDescription} onChange={setJobDescription} />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <SparkleIcon />
+                Tailor my resume
+              </button>
+
+              <span className="text-sm text-muted">
+                {outOfFreeUses
+                  ? "You've hit today's usage cap on this browser."
+                  : `${remaining} free tailoring${remaining === 1 ? "" : "s"} left on this browser`}
+              </span>
+            </div>
+
+            {outOfFreeUses && (
+              <div
+                role="status"
+                className="rounded-xl border border-score-mid/40 bg-score-mid/10 p-4 text-sm text-score-mid"
+              >
+                Message us if you want to keep testing. We&apos;ll bump it up.
+              </div>
+            )}
+
+            {error && (
+              <div
+                role="alert"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-score-low/40 bg-score-low/10 p-4 text-sm text-score-low"
+              >
+                <span>{error}</span>
+                <button
+                  type="button"
+                  onClick={() => void runTailoring()}
+                  disabled={!canSubmit}
+                  className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-score-low/40 px-3 py-1.5 text-sm font-medium transition hover:bg-score-low/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </form>
         )}
         </main>
+
+        <HowItWorks />
+        <TrustPrivacy />
+        <Faq />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

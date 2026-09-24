@@ -15,13 +15,21 @@ export function diffWords(before: string, after: string): DiffOp[] {
   const a = tokenize(before);
   const b = tokenize(after);
 
+  // Match on the word with its trailing whitespace trimmed off, so a word
+  // that only gained or lost trailing space (e.g. it used to end the
+  // sentence and now has a clause appended after it) still matches as
+  // unchanged instead of registering as a spurious remove+add.
+  const keyOf = (token: string) => (/\S/.test(token) ? token.trimEnd() : token);
+  const ak = a.map(keyOf);
+  const bk = b.map(keyOf);
+
   const lcs: number[][] = Array.from({ length: a.length + 1 }, () =>
     new Array<number>(b.length + 1).fill(0),
   );
   for (let i = a.length - 1; i >= 0; i--) {
     for (let j = b.length - 1; j >= 0; j--) {
       lcs[i][j] =
-        a[i] === b[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+        ak[i] === bk[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
     }
   }
 
@@ -38,8 +46,10 @@ export function diffWords(before: string, after: string): DiffOp[] {
   let i = 0;
   let j = 0;
   while (i < a.length && j < b.length) {
-    if (a[i] === b[j]) {
-      push("equal", a[i]);
+    if (ak[i] === bk[j]) {
+      // Use the "after" token so the reconstructed non-removed text matches
+      // the tailored resume exactly, including its own whitespace.
+      push("equal", b[j]);
       i++;
       j++;
     } else if (lcs[i + 1][j] >= lcs[i][j + 1]) {

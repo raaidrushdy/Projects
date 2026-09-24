@@ -5,8 +5,7 @@ import { z } from "zod";
 import { looksLikeLatex } from "@/lib/latex";
 
 export const runtime = "nodejs";
-// Adaptive thinking + a 16k output budget can comfortably exceed the platform's
-// default serverless timeout; this is the max duration Vercel's Hobby plan allows.
+// The max duration Vercel's Hobby plan allows; see the streaming comment below.
 export const maxDuration = 60;
 
 const MAX_INPUT_CHARS = 20000;
@@ -95,7 +94,16 @@ export async function POST(request: Request) {
       "as clean plain text.\n";
 
   try {
-    const message = await client.messages.parse({
+    // A non-streaming call sits fully buffered until generation finishes, so
+    // nothing comes back to Vercel until the last token is out. On a complex
+    // LaTeX resume that can run past the platform's own request handling and
+    // trip a bare, non-JSON 504 before our own error handling below ever
+    // runs. Streaming (still awaited to one final response here, nothing is
+    // pushed to the client mid-generation) sidesteps that; effort "medium"
+    // also cuts generation time directly, since "high" was overkill for a
+    // rewrite-plus-cover-letter task. maxDuration=60 (Vercel Hobby's ceiling)
+    // still applies regardless of either change.
+    const stream = client.messages.stream({
       model: "claude-sonnet-5",
       max_tokens: 16000,
       thinking: { type: "adaptive" },
@@ -127,8 +135,11 @@ export async function POST(request: Request) {
       ],
       output_config: {
         format: zodOutputFormat(TailorResultSchema),
+        effort: "medium",
       },
     });
+
+    const message = await stream.finalMessage();
 
     if (!message.parsed_output) {
       throw new Error("Model response did not match the expected schema");

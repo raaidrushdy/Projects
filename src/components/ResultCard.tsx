@@ -22,7 +22,11 @@ function downloadTextFile(filename: string, content: string) {
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  // Some browsers only dispatch the download navigation for a click on an
+  // element that's actually in the document.
+  document.body.appendChild(link);
   link.click();
+  link.remove();
   URL.revokeObjectURL(url);
 }
 

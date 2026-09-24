@@ -21,12 +21,14 @@ export function RedlineView({ before, after }: RedlineViewProps) {
               key={i}
               className="text-redline-remove no-underline line-through decoration-1 opacity-75"
             >
+              <span className="sr-only">Removed: </span>
               {op.text}
             </del>
           );
         }
         return (
           <ins key={i} className="text-accent font-semibold underline decoration-1 underline-offset-2">
+            <span className="sr-only">Added: </span>
             {op.text}
           </ins>
         );

@@ -6,7 +6,7 @@ import { RedlineView } from "@/components/RedlineView";
 
 function DownloadIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4" aria-hidden="true">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

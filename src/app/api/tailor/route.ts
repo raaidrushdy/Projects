@@ -30,6 +30,9 @@ const TailorResultSchema = z.object({
       "Up to 3 short, specific issues a hiring manager would notice in the ORIGINAL resume within 10 seconds.",
     ),
   tailoredResume: z.string(),
+});
+
+const CoverLetterResultSchema = z.object({
   coverLetter: z.string(),
 });
 
@@ -81,58 +84,81 @@ export async function POST(request: Request) {
     "your edits applied — valid, compilable LaTeX, not a fragment, not rebuilt " +
     "from scratch, no markdown code fences, no commentary outside the source.\n";
 
+  const userContent =
+    `Job description:\n"""\n${jobDescription}\n"""\n\n` + `Original resume:\n"""\n${resume}\n"""`;
+
   try {
     // A non-streaming call sits fully buffered until generation finishes, so
-    // nothing comes back to Vercel until the last token is out. On a complex
-    // LaTeX resume that can run past the platform's own request handling and
-    // trip a bare, non-JSON 504 before our own error handling below ever
-    // runs. Streaming (still awaited to one final response here, nothing is
-    // pushed to the client mid-generation) sidesteps that; effort "medium"
-    // also cuts generation time directly, since "high" was overkill for a
-    // rewrite-plus-cover-letter task. maxDuration=60 (Vercel Hobby's ceiling)
-    // still applies regardless of either change.
-    const stream = client.messages.stream({
-      model: "claude-sonnet-5",
-      max_tokens: 16000,
-      thinking: { type: "adaptive" },
-      system:
-        "You are an expert resume writer and a senior technical recruiter for the " +
-        "exact company/role in the job description below. Work through this in order:\n\n" +
-        "1. As the recruiter, score how well the ORIGINAL resume matches the job " +
-        "description (0-100), list up to 5 important keywords/skills the posting " +
-        "emphasizes that the original resume doesn't mention, and up to 3 specific red " +
-        "flags a hiring manager would notice in the first 10 seconds (e.g. no measurable " +
-        "impact, buried relevant experience, jargon mismatch with the posting). Read " +
-        "through the LaTeX markup to the actual content for this analysis.\n" +
-        rewriteInstruction +
-        "3. Re-read your rewrite as an ATS filter and as a hiring manager skimming 200 " +
-        "resumes in one sitting — if any section would still get skipped, revise it.\n" +
-        "4. Write a concise, specific cover letter (under 350 words) for the same " +
-        "posting, as plain text.\n\n" +
-        "Report matchScore, missingKeywords, and redFlags for the ORIGINAL resume " +
-        "(step 1, before your rewrite) so the user can see what was wrong and what you " +
-        "fixed — not a re-score of your own output.",
-      messages: [
-        {
-          role: "user",
-          content:
-            `Job description:\n"""\n${jobDescription}\n"""\n\n` +
-            `Original resume:\n"""\n${resume}\n"""`,
-        },
-      ],
-      output_config: {
-        format: zodOutputFormat(TailorResultSchema),
-        effort: "medium",
-      },
-    });
+    // nothing comes back to Vercel until the last token is out — on a complex
+    // LaTeX resume that can trip a bare, non-JSON 504 before our own error
+    // handling below ever runs. Streaming (still awaited to one final
+    // response here, nothing is pushed to the client mid-generation)
+    // sidesteps that. But maxDuration=60 (Vercel Hobby's ceiling) is a cap on
+    // total wall time regardless of streaming, and the previous single-call
+    // version generated the analysis, the full rewritten LaTeX, a
+    // self-critique pass, AND the cover letter serially in one completion —
+    // long enough on a large resume to blow through 60s outright. The cover
+    // letter doesn't depend on the rewritten resume (same underlying facts,
+    // just different phrasing), so it's split into its own smaller, lower-
+    // effort call and run concurrently with the analysis+rewrite call: wall
+    // time is now roughly the slower of the two instead of their sum.
+    const [analysis, coverLetter] = await Promise.all([
+      client.messages
+        .stream({
+          model: "claude-sonnet-5",
+          max_tokens: 12000,
+          thinking: { type: "adaptive" },
+          system:
+            "You are an expert resume writer and a senior technical recruiter for the " +
+            "exact company/role in the job description below. Work through this in order:\n\n" +
+            "1. As the recruiter, score how well the ORIGINAL resume matches the job " +
+            "description (0-100), list up to 5 important keywords/skills the posting " +
+            "emphasizes that the original resume doesn't mention, and up to 3 specific red " +
+            "flags a hiring manager would notice in the first 10 seconds (e.g. no measurable " +
+            "impact, buried relevant experience, jargon mismatch with the posting). Read " +
+            "through the LaTeX markup to the actual content for this analysis.\n" +
+            rewriteInstruction +
+            "3. Re-read your rewrite as an ATS filter and as a hiring manager skimming 200 " +
+            "resumes in one sitting — if any section would still get skipped, revise it.\n\n" +
+            "Report matchScore, missingKeywords, and redFlags for the ORIGINAL resume " +
+            "(step 1, before your rewrite) so the user can see what was wrong and what you " +
+            "fixed — not a re-score of your own output.",
+          messages: [{ role: "user", content: userContent }],
+          output_config: {
+            format: zodOutputFormat(TailorResultSchema),
+            effort: "medium",
+          },
+        })
+        .finalMessage(),
+      client.messages
+        .stream({
+          model: "claude-sonnet-5",
+          max_tokens: 1500,
+          thinking: { type: "adaptive" },
+          system:
+            "You are an expert resume writer helping a candidate apply for the exact role " +
+            "in the job description below. Write a concise, specific cover letter (under " +
+            "350 words) for this candidate applying to this posting, as plain text. Base it " +
+            "only on the candidate's real resume content below (it's LaTeX source — read " +
+            "through the markup to the actual content) — never invent a metric, employer, " +
+            "title, or date that isn't in the original.",
+          messages: [{ role: "user", content: userContent }],
+          output_config: {
+            format: zodOutputFormat(CoverLetterResultSchema),
+            effort: "low",
+          },
+        })
+        .finalMessage(),
+    ]);
 
-    const message = await stream.finalMessage();
-
-    if (!message.parsed_output) {
+    if (!analysis.parsed_output || !coverLetter.parsed_output) {
       throw new Error("Model response did not match the expected schema");
     }
 
-    return NextResponse.json(message.parsed_output);
+    return NextResponse.json({
+      ...analysis.parsed_output,
+      coverLetter: coverLetter.parsed_output.coverLetter,
+    });
   } catch (error) {
     console.error("Tailoring failed:", error);
     return NextResponse.json(

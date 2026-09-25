@@ -16,12 +16,6 @@ export const runtime = "nodejs";
 // still occur after this change ships.
 export const maxDuration = 120;
 
-// Below this, the analysis+rewrite call uses Opus 5 (best quality — this is
-// where we have the most latency headroom to spend on it). Above it, the
-// call's generation time scales with input size (it produces the full
-// rewritten LaTeX document), so it drops to Sonnet 5 for the latency margin.
-const LARGE_INPUT_THRESHOLD = 9000;
-
 interface TailorRequestBody {
   resume?: string;
   jobDescription?: string;
@@ -120,14 +114,13 @@ export async function POST(request: Request) {
     // Timeouts kept recurring in production even after that split, so the
     // remaining bottleneck (the analysis+rewrite call, since it generates the
     // full LaTeX document) runs at effort "low" — this does trade some
-    // rewrite quality/thoroughness for a latency cut. Model choice is the
-    // quality lever instead: Opus 5 for typical-sized resumes (best output,
-    // fewest errors, and this path has the most latency headroom), Sonnet 5
-    // for large ones (see LARGE_INPUT_THRESHOLD above) to protect that
-    // headroom where generation time is highest. Both support the same
-    // effort/thinking shape, unlike Haiku 4.5 (which this path used
-    // previously) — Haiku rejects output_config.effort outright and only
-    // takes the older budget_tokens form of thinking.
+    // rewrite quality/thoroughness for a latency cut. Both calls use Opus 5
+    // (best output, fewest errors): measured directly, a near-14,000-char
+    // resume (the input cap) on Opus finished in ~22-25s, no slower than
+    // Sonnet was at similar sizes — effort "low" turned out to be doing most
+    // of the latency-limiting work, not model choice, so there was no real
+    // latency reason left to downgrade the model on either call, only cost
+    // (Opus is ~2.5x Sonnet's per-token price).
     const analysisSystemPrompt =
       "You are an expert resume writer and a senior technical recruiter for the " +
       "exact company/role in the job description below. Work through this in order:\n\n" +
@@ -144,12 +137,10 @@ export async function POST(request: Request) {
       "(step 1, before your rewrite) so the user can see what was wrong and what you " +
       "fixed — not a re-score of your own output.";
 
-    const analysisModel = resume.length > LARGE_INPUT_THRESHOLD ? "claude-sonnet-5" : "claude-opus-5";
-
     const [analysis, coverLetter] = await Promise.all([
       client.messages
         .stream({
-          model: analysisModel,
+          model: "claude-opus-5",
           max_tokens: 12000,
           thinking: { type: "adaptive" },
           system: analysisSystemPrompt,
@@ -162,7 +153,7 @@ export async function POST(request: Request) {
         .finalMessage(),
       client.messages
         .stream({
-          model: "claude-sonnet-5",
+          model: "claude-opus-5",
           max_tokens: 1500,
           thinking: { type: "adaptive" },
           system:

@@ -228,14 +228,14 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
       {!uploadError && isOverLimit && (
         <p className="text-xs text-score-low">
           {charCount.toLocaleString()} characters is over the {MAX_INPUT_CHARS.toLocaleString()}{" "}
-          limit — trim it down before submitting.
+          limit. Trim it down before submitting.
         </p>
       )}
 
       {!uploadError && !isOverLimit && showLatexWarning && (
         <p className="text-xs text-muted">
           This doesn&apos;t look like LaTeX source (no <code>\documentclass</code> or{" "}
-          <code>\begin&#123;document&#125;</code>) — Redrafted edits .tex files in place, so
+          <code>\begin&#123;document&#125;</code>). Redrafted edits .tex files in place, so
           results may be unreliable.
         </p>
       )}

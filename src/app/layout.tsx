@@ -28,9 +28,9 @@ const fredoka = Fredoka({
 });
 
 export const metadata: Metadata = {
-  title: "Redrafted: tailor your resume in seconds",
+  title: "Redrafted: tailor your LaTeX resume in seconds",
   description:
-    "Paste your resume and a job posting to get an AI-tailored resume and cover letter.",
+    "Paste your .tex resume and a job posting to get an AI-tailored resume and cover letter.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

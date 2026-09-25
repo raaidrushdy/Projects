@@ -36,6 +36,38 @@ function DownloadIcon() {
   );
 }
 
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4" aria-hidden="true">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6v6M10 14 20 4"
+      />
+    </svg>
+  );
+}
+
+/** Opens the tailored LaTeX in Overleaf via Overleaf's documented
+    "Open in Overleaf" form POST (https://www.overleaf.com/how-to/open_in_overleaf) —
+    no hosting or compilation needed on our end, and it's the fastest way for
+    someone to see the tailored resume actually render before they commit to it. */
+function OpenInOverleafButton({ tex }: { tex: string }) {
+  return (
+    <form action="https://www.overleaf.com/docs" method="post" target="_blank">
+      <input type="hidden" name="snip" value={tex} />
+      <input type="hidden" name="snip_name" value="tailored-resume.tex" />
+      <button
+        type="submit"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
+      >
+        <ExternalLinkIcon />
+        Open in Overleaf
+      </button>
+    </form>
+  );
+}
+
 /** Score + "X of Y key skills covered" + a link into the Changes tab.
     Replaces the old full-size match-score block as the default, always-
     visible summary; the full detail (score circle, keyword chips, red
@@ -143,6 +175,7 @@ export function ResultsTabs({
                 <DownloadIcon />
                 Download .tex
               </button>
+              <OpenInOverleafButton tex={tailoredResume} />
             </div>
           </div>
 

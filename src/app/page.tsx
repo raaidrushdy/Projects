@@ -106,15 +106,20 @@ export default function Home() {
           {!result && (
             <div id="top" className="flex scroll-mt-24 flex-col items-center gap-3 pt-2 text-center">
               <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                Your resume, rewritten for every job.
+                Your LaTeX resume, rewritten for every job.
               </h1>
               <p className="max-w-md text-muted sm:text-lg">
-                Paste your resume and the job posting. Get a tailored resume and cover letter
-                back in seconds.
+                Paste your .tex resume and the job posting. Get a tailored resume and cover
+                letter back in seconds.
               </p>
-              <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
-                Free while we&apos;re testing
-              </span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
+                  Free while we&apos;re testing
+                </span>
+                <span className="rounded-full border border-line px-3 py-1 text-xs font-medium text-muted">
+                  Built for LaTeX resumes
+                </span>
+              </div>
             </div>
           )}
 

@@ -20,7 +20,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Does it keep my LaTeX formatting?",
-    a: "Yes. If you paste or upload LaTeX, the content is edited in place. Your document class, packages, and custom commands are left untouched.",
+    a: "Yes. The content is edited in place. Your document class, packages, and custom commands are left untouched.",
   },
   {
     q: "Is my data stored?",
@@ -28,7 +28,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What file types work?",
-    a: "PDF, Word (.docx), and LaTeX (.tex) uploads all work, or you can paste plain text directly into the resume field.",
+    a: "LaTeX (.tex) only. Paste your LaTeX source directly into the resume field, or upload a .tex file.",
   },
   {
     q: "Is it really free?",

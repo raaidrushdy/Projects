@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { MatchAnalysis } from "@/components/MatchAnalysis";
 import { RedlineView } from "@/components/RedlineView";
-import { downloadTextFile, downloadUrl } from "@/lib/download";
-import { compileLatexToPdf, PDF_TIMEOUT_MESSAGE } from "@/lib/pdftexEngine";
-
-const PDF_TIMEOUT_MS = 20000;
+import { downloadTextFile } from "@/lib/download";
 
 type TabId = "resume" | "cover-letter" | "changes";
 
@@ -23,7 +20,6 @@ interface ResultsTabsProps {
   redFlags: string[];
   tailoredResume: string;
   coverLetter: string;
-  isLatex: boolean;
   originalResume: string;
   onStartOver: () => void;
 }
@@ -82,62 +78,17 @@ function SummaryBar({
   );
 }
 
-type PdfState =
-  | { status: "compiling" }
-  | { status: "ready"; url: string }
-  | { status: "error"; message: string };
-
 export function ResultsTabs({
   matchScore,
   missingKeywords,
   redFlags,
   tailoredResume,
   coverLetter,
-  isLatex,
   originalResume,
   onStartOver,
 }: ResultsTabsProps) {
   const [tab, setTab] = useState<TabId>("resume");
   const [coverLetterDraft, setCoverLetterDraft] = useState(coverLetter);
-  const [pdf, setPdf] = useState<PdfState>({ status: "compiling" });
-  const [attempt, setAttempt] = useState(0);
-  const pdfUrlRef = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (!isLatex) return;
-    let cancelled = false;
-
-    compileLatexToPdf(tailoredResume, PDF_TIMEOUT_MS)
-      .then((result) => {
-        if (cancelled) return;
-        if (result.success && result.pdfUrl) {
-          pdfUrlRef.current = result.pdfUrl;
-          setPdf({ status: "ready", url: result.pdfUrl });
-        } else {
-          setPdf({ status: "error", message: result.message || PDF_TIMEOUT_MESSAGE });
-        }
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setPdf({
-          status: "error",
-          message: err instanceof Error ? err.message : PDF_TIMEOUT_MESSAGE,
-        });
-      });
-
-    return () => {
-      cancelled = true;
-      if (pdfUrlRef.current) {
-        URL.revokeObjectURL(pdfUrlRef.current);
-        pdfUrlRef.current = undefined;
-      }
-    };
-  }, [tailoredResume, isLatex, attempt]);
-
-  function retryCompile() {
-    setPdf({ status: "compiling" });
-    setAttempt((n) => n + 1);
-  }
 
   function viewMissingKeywords() {
     setTab("changes");
@@ -183,71 +134,24 @@ export function ResultsTabs({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-lg font-semibold tracking-tight">Tailored resume</h2>
             <div className="flex flex-wrap justify-end gap-2">
-              <CopyButton text={tailoredResume} label={isLatex ? "Copy LaTeX" : "Copy"} />
+              <CopyButton text={tailoredResume} label="Copy LaTeX" />
               <button
                 type="button"
-                onClick={() =>
-                  downloadTextFile(isLatex ? "tailored-resume.tex" : "tailored-resume.txt", tailoredResume)
-                }
+                onClick={() => downloadTextFile("tailored-resume.tex", tailoredResume)}
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
               >
                 <DownloadIcon />
-                {isLatex ? "Download .tex" : "Download"}
+                Download .tex
               </button>
-              {isLatex && (
-                <button
-                  type="button"
-                  disabled={pdf.status !== "ready"}
-                  onClick={() => pdf.status === "ready" && downloadUrl("tailored-resume.pdf", pdf.url)}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <DownloadIcon />
-                  Download PDF
-                </button>
-              )}
             </div>
           </div>
 
-          {isLatex ? (
-            <div className="grid gap-4 lg:grid-cols-2">
-              <pre
-                tabIndex={0}
-                className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-mono text-sm leading-relaxed shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-              >
-                {tailoredResume}
-              </pre>
-              <div className="h-[32rem] overflow-hidden rounded-md border border-line bg-surface shadow-sm">
-                {pdf.status === "compiling" && (
-                  <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-muted">
-                    <span className="step-pulse h-2 w-2 rounded-full bg-accent" />
-                    Compiling the PDF preview. This can take a moment the first time.
-                  </div>
-                )}
-                {pdf.status === "error" && (
-                  <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-muted">
-                    <p>{pdf.message}</p>
-                    <button
-                      type="button"
-                      onClick={retryCompile}
-                      className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                )}
-                {pdf.status === "ready" && (
-                  <iframe src={pdf.url} title="Tailored resume PDF preview" className="h-full w-full" />
-                )}
-              </div>
-            </div>
-          ) : (
-            <pre
-              tabIndex={0}
-              className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-serif text-sm leading-relaxed shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-            >
-              {tailoredResume}
-            </pre>
-          )}
+          <pre
+            tabIndex={0}
+            className="h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-surface p-5 font-mono text-sm leading-relaxed shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+          >
+            {tailoredResume}
+          </pre>
         </div>
       )}
 

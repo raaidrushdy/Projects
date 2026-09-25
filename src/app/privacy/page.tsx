@@ -39,8 +39,8 @@ export default function PrivacyPage() {
             <div className="flex flex-col gap-2">
               <h2 className="text-base font-semibold">Uploaded files</h2>
               <p>
-                A PDF, Word, or LaTeX file you upload is parsed into plain text on our server and
-                the file itself is discarded immediately after. We never store the original file.
+                A .tex file you upload is read as plain text on our server and the file itself is
+                discarded immediately after. We never store the original file.
               </p>
             </div>
 

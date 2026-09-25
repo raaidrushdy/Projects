@@ -19,7 +19,6 @@ interface TailorResult {
   redFlags: string[];
   tailoredResume: string;
   coverLetter: string;
-  isLatex: boolean;
 }
 
 const GENERIC_ERROR = "The tailoring request failed. Try again in a moment.";
@@ -129,7 +128,6 @@ export default function Home() {
             redFlags={result.redFlags}
             tailoredResume={result.tailoredResume}
             coverLetter={result.coverLetter}
-            isLatex={result.isLatex}
             originalResume={submittedResume}
             onStartOver={startOver}
           />

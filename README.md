@@ -1,7 +1,7 @@
 # Redrafted
 
-Upload or paste your resume and a job posting, get back a resume tailored to that job
-plus a matching cover letter — in seconds.
+Upload or paste your LaTeX resume and a job posting, get back a resume tailored to that
+job plus a matching cover letter — in seconds.
 
 ## Why
 
@@ -45,16 +45,15 @@ posting's language, without inventing new facts.
 - `src/app/page.tsx` — the UI: a resume field (drag-and-drop upload or paste), a job
   description textarea, a submit button, and a results view with copy/download for the
   tailored resume and cover letter.
-- `src/components/ResumeField.tsx` — the resume input: drag-and-drop or click-to-browse
-  file upload (PDF, `.docx`, `.tex`/`.txt`), falling back to a plain paste-in textarea.
-- `src/app/api/extract-resume/route.ts` — server route that extracts plain text from an
-  uploaded PDF (`pdf-parse`) or Word doc (`mammoth`); `.tex`/`.txt` files are read as-is.
+- `src/components/ResumeField.tsx` — the resume input: a LaTeX-only code editor (line
+  numbers, monospace) that accepts pasted `.tex` source or a dropped/uploaded `.tex` file.
+- `src/app/api/extract-resume/route.ts` — server route that reads an uploaded `.tex` file
+  as plain text.
 - `src/app/api/tailor/route.ts` — server route that calls the Claude API and returns
-  `{ tailoredResume, coverLetter, isLatex, ... }` as JSON. When the resume text is
-  detected as LaTeX source (`src/lib/latex.ts`), the model edits it in place — preserving
-  the document's structure/packages/commands and returning valid, compilable LaTeX —
-  instead of flattening it to plain text. There's no server-side LaTeX compilation; the
-  output is source the user pastes into Overleaf or compiles locally.
+  `{ tailoredResume, coverLetter, ... }` as JSON. The model edits the LaTeX in place —
+  preserving the document's structure/packages/commands and returning valid, compilable
+  LaTeX. There's no LaTeX compilation anywhere in the app; the output is source the user
+  pastes into Overleaf or compiles locally.
 - `src/lib/usage.ts` — tracks usage in `localStorage` per browser, purely as a sanity
   cap against runaway API cost (resets if storage is cleared; not an entitlement system).
 - `src/app/globals.css` + `src/lib/theme.ts` + `src/components/ThemeToggle.tsx` — the

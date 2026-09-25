@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, type ChangeEvent, type DragEvent, type UIEvent } from "react";
 import { parseJsonResponse } from "@/lib/api";
 
-const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".tex", ".txt"];
+const ACCEPTED_EXTENSIONS = [".tex"];
 const MIN_GUTTER_LINES = 12;
 
 interface ResumeFieldProps {
@@ -39,6 +39,7 @@ function UploadIcon({ className = "h-6 w-6" }: { className?: string }) {
 export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +52,7 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
 
   async function uploadFile(file: File) {
     if (!isAcceptedFile(file)) {
-      setUploadError("Unsupported file type. Upload a PDF, .docx, or .tex file.");
+      setUploadError("Unsupported file type. Upload a .tex file.");
       return;
     }
 
@@ -108,7 +109,11 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
     onLoadExample();
   }
 
-  const showOverlay = !value && !isUploading;
+  // The overlay is a drop-zone invitation for the idle, untouched field —
+  // once it's focused (even with nothing typed yet), it should get out of
+  // the way and show line 1 with a blinking cursor, like a real code editor,
+  // not stay covering the gutter until the first keystroke.
+  const showOverlay = !value && !isUploading && !isFocused;
 
   return (
     <div className="flex flex-col gap-2">
@@ -116,12 +121,12 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
         Your resume <span className="text-muted">(required)</span>
       </span>
 
-      {/* Styled like a code editor (monospace, line-number gutter) since
-          pasted resumes are often LaTeX source. The toolbar (Load
-          example/Upload) lives inside this fixed-height box, not in the
-          label row above, so the label row stays a plain text baseline
-          shared with the job description panel — both panels' top and
-          bottom edges land in the same place regardless of what's inside. */}
+      {/* Styled like a code editor (monospace, line-number gutter) since the
+          resume is always LaTeX source. The toolbar (Load example/Upload)
+          lives inside this fixed-height box, not in the label row above, so
+          the label row stays a plain text baseline shared with the job
+          description panel — both panels' top and bottom edges land in the
+          same place regardless of what's inside. */}
       <div
         onDragOver={(event) => {
           event.preventDefault();
@@ -176,6 +181,8 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
             value={value}
             onChange={(event) => onChange(event.target.value)}
             onScroll={handleTextareaScroll}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             required
             aria-labelledby="resume-field-label"
             className="w-full resize-none overflow-y-auto bg-transparent py-3 pr-3 leading-relaxed outline-none"
@@ -184,8 +191,8 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
           {showOverlay && (
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface px-6 text-center font-sans text-muted">
               <UploadIcon />
-              <p className="text-sm">Drop your resume here to upload</p>
-              <p className="text-xs">PDF, Word (.docx), or LaTeX (.tex). Or paste text directly.</p>
+              <p className="text-sm">Paste your .tex resume, or drop a .tex file here</p>
+              <p className="text-xs">LaTeX (.tex) only.</p>
             </div>
           )}
 

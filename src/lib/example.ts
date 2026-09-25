@@ -2,28 +2,43 @@
     having their own resume and job posting on hand yet. Deliberately built
     so the job posting asks for a couple of things (GraphQL, experimentation)
     the example resume doesn't mention, so the match analysis has something
-    real to show. */
-export const EXAMPLE_RESUME = `Priya Raghavan
-Frontend Engineer
-priya.raghavan@email.com | (416) 555-0148 | Toronto, ON
+    real to show. LaTeX source, since that's the only format the tool
+    accepts. */
+export const EXAMPLE_RESUME = `\\documentclass[11pt]{article}
+\\usepackage[margin=1in]{geometry}
+\\pagestyle{empty}
 
-EXPERIENCE
+\\begin{document}
 
-Frontend Engineer, Bellwood Systems (2022-Present)
-- Rebuilt the customer billing dashboard in React, cutting page load time from 4.1s to 1.6s
-- Led migration of the design system to Tailwind CSS across 12 product surfaces
-- Mentored two junior engineers through their first full feature launches
+\\begin{center}
+{\\Large \\textbf{Priya Raghavan}} \\\\
+Frontend Engineer \\\\
+priya.raghavan@email.com \\quad (416) 555-0148 \\quad Toronto, ON
+\\end{center}
 
-Frontend Developer, Casewell Studio (2020-2022)
-- Built marketing and onboarding flows for six client web apps
-- Introduced automated accessibility checks into the CI pipeline
-- Partnered with designers to turn Figma files into production components
+\\section*{Experience}
 
-EDUCATION
+\\textbf{Frontend Engineer, Bellwood Systems} (2022--Present)
+\\begin{itemize}
+  \\item Rebuilt the customer billing dashboard in React, cutting page load time from 4.1s to 1.6s
+  \\item Led migration of the design system to Tailwind CSS across 12 product surfaces
+  \\item Mentored two junior engineers through their first full feature launches
+\\end{itemize}
+
+\\textbf{Frontend Developer, Casewell Studio} (2020--2022)
+\\begin{itemize}
+  \\item Built marketing and onboarding flows for six client web apps
+  \\item Introduced automated accessibility checks into the CI pipeline
+  \\item Partnered with designers to turn Figma files into production components
+\\end{itemize}
+
+\\section*{Education}
 B.Sc. Computer Science, University of Waterloo, 2020
 
-SKILLS
-React, TypeScript, Tailwind CSS, REST APIs, Jest, Git`;
+\\section*{Skills}
+React, TypeScript, Tailwind CSS, REST APIs, Jest, Git
+
+\\end{document}`;
 
 export const EXAMPLE_JOB_DESCRIPTION = `Senior Frontend Engineer, Growth
 Alderleaf Health

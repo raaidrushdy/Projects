@@ -16,7 +16,7 @@ function CheckIcon() {
 const POINTS = [
   "Nothing you paste is stored once your result comes back, and none of it trains any model.",
   "Nothing is invented. Only the experience already on your resume gets reworded.",
-  "Your formatting is preserved exactly, LaTeX included.",
+  "Your LaTeX formatting is preserved exactly, preamble and all.",
 ];
 
 export function TrustPrivacy() {

@@ -16,10 +16,10 @@ export const runtime = "nodejs";
 // still occur after this change ships.
 export const maxDuration = 120;
 
-// Above this, the analysis+rewrite call switches from Sonnet to Haiku (see
-// below) for extra latency margin exactly where the risk concentrates: the
-// call's generation time scales with input size, since it produces the full
-// rewritten LaTeX document.
+// Below this, the analysis+rewrite call uses Opus 5 (best quality — this is
+// where we have the most latency headroom to spend on it). Above it, the
+// call's generation time scales with input size (it produces the full
+// rewritten LaTeX document), so it drops to Sonnet 5 for the latency margin.
 const LARGE_INPUT_THRESHOLD = 9000;
 
 interface TailorRequestBody {
@@ -119,15 +119,15 @@ export async function POST(request: Request) {
     //
     // Timeouts kept recurring in production even after that split, so the
     // remaining bottleneck (the analysis+rewrite call, since it generates the
-    // full LaTeX document) is now effort "low" instead of "medium" — this
-    // does trade some rewrite quality/thoroughness for a further latency
-    // cut. On top of that, large inputs (see LARGE_INPUT_THRESHOLD above)
-    // switch this call to Haiku, which is meaningfully faster per token than
-    // Sonnet. Haiku 4.5 doesn't support output_config.effort (the API
-    // rejects it) or thinking: {type: "adaptive"} (it only takes the older
-    // budget_tokens form) — this rewrite doesn't need extended thinking, so
-    // thinking is omitted entirely for the Haiku path rather than ported
-    // over in its older shape.
+    // full LaTeX document) runs at effort "low" — this does trade some
+    // rewrite quality/thoroughness for a latency cut. Model choice is the
+    // quality lever instead: Opus 5 for typical-sized resumes (best output,
+    // fewest errors, and this path has the most latency headroom), Sonnet 5
+    // for large ones (see LARGE_INPUT_THRESHOLD above) to protect that
+    // headroom where generation time is highest. Both support the same
+    // effort/thinking shape, unlike Haiku 4.5 (which this path used
+    // previously) — Haiku rejects output_config.effort outright and only
+    // takes the older budget_tokens form of thinking.
     const analysisSystemPrompt =
       "You are an expert resume writer and a senior technical recruiter for the " +
       "exact company/role in the job description below. Work through this in order:\n\n" +
@@ -144,31 +144,21 @@ export async function POST(request: Request) {
       "(step 1, before your rewrite) so the user can see what was wrong and what you " +
       "fixed — not a re-score of your own output.";
 
-    const isLargeInput = resume.length > LARGE_INPUT_THRESHOLD;
+    const analysisModel = resume.length > LARGE_INPUT_THRESHOLD ? "claude-sonnet-5" : "claude-opus-5";
 
     const [analysis, coverLetter] = await Promise.all([
       client.messages
-        .stream(
-          isLargeInput
-            ? {
-                model: "claude-haiku-4-5",
-                max_tokens: 12000,
-                system: analysisSystemPrompt,
-                messages: [{ role: "user", content: userContent }],
-                output_config: { format: zodOutputFormat(TailorResultSchema) },
-              }
-            : {
-                model: "claude-sonnet-5",
-                max_tokens: 12000,
-                thinking: { type: "adaptive" },
-                system: analysisSystemPrompt,
-                messages: [{ role: "user", content: userContent }],
-                output_config: {
-                  format: zodOutputFormat(TailorResultSchema),
-                  effort: "low",
-                },
-              },
-        )
+        .stream({
+          model: analysisModel,
+          max_tokens: 12000,
+          thinking: { type: "adaptive" },
+          system: analysisSystemPrompt,
+          messages: [{ role: "user", content: userContent }],
+          output_config: {
+            format: zodOutputFormat(TailorResultSchema),
+            effort: "low",
+          },
+        })
         .finalMessage(),
       client.messages
         .stream({

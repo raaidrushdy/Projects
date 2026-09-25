@@ -5,8 +5,22 @@ import { z } from "zod";
 import { MAX_INPUT_CHARS } from "@/lib/limits";
 
 export const runtime = "nodejs";
-// The max duration Vercel's Hobby plan allows; see the streaming comment below.
-export const maxDuration = 60;
+// Vercel Hobby's default AND maximum is actually 300s with Fluid Compute
+// (enabled by default for any project created after April 2025, which this
+// one is) — the old assumption baked into this file, that Hobby hard-caps at
+// 60s, was outdated and this constant was the real bottleneck. 120s leaves
+// large headroom over every observed run (worst case ~27s pre-optimization,
+// well under that now) while stopping well short of the 300s ceiling, in
+// case Fluid Compute somehow isn't active for this project — verify in the
+// Vercel dashboard under Settings -> Functions -> Fluid Compute if timeouts
+// still occur after this change ships.
+export const maxDuration = 120;
+
+// Above this, the analysis+rewrite call switches from Sonnet to Haiku (see
+// below) for extra latency margin exactly where the risk concentrates: the
+// call's generation time scales with input size, since it produces the full
+// rewritten LaTeX document.
+const LARGE_INPUT_THRESHOLD = 9000;
 
 interface TailorRequestBody {
   resume?: string;
@@ -93,51 +107,68 @@ export async function POST(request: Request) {
     // LaTeX resume that can trip a bare, non-JSON 504 before our own error
     // handling below ever runs. Streaming (still awaited to one final
     // response here, nothing is pushed to the client mid-generation)
-    // sidesteps that. But maxDuration=60 (Vercel Hobby's ceiling) is a cap on
-    // total wall time regardless of streaming, and the previous single-call
+    // sidesteps that. maxDuration (see above) is still a hard cap on total
+    // wall time regardless of streaming, and the original single-call
     // version generated the analysis, the full rewritten LaTeX, a
     // self-critique pass, AND the cover letter serially in one completion —
-    // long enough on a large resume to blow through 60s outright. The cover
-    // letter doesn't depend on the rewritten resume (same underlying facts,
-    // just different phrasing), so it's split into its own smaller, lower-
-    // effort call and run concurrently with the analysis+rewrite call: wall
-    // time is now roughly the slower of the two instead of their sum.
+    // long enough on a large resume to blow through even the raised cap. The
+    // cover letter doesn't depend on the rewritten resume (same underlying
+    // facts, just different phrasing), so it's split into its own smaller,
+    // lower-effort call and run concurrently with the analysis+rewrite call:
+    // wall time is now roughly the slower of the two instead of their sum.
     //
     // Timeouts kept recurring in production even after that split, so the
     // remaining bottleneck (the analysis+rewrite call, since it generates the
     // full LaTeX document) is now effort "low" instead of "medium" — this
     // does trade some rewrite quality/thoroughness for a further latency
-    // cut, since on Vercel Hobby there's no way to raise the 60s ceiling
-    // itself. If timeouts persist on very large resumes even at this
-    // setting, the remaining fix is raising maxDuration on a paid Vercel
-    // plan (Hobby hard-caps it at 60 regardless of what's set here).
+    // cut. On top of that, large inputs (see LARGE_INPUT_THRESHOLD above)
+    // switch this call to Haiku, which is meaningfully faster per token than
+    // Sonnet. Haiku 4.5 doesn't support output_config.effort (the API
+    // rejects it) or thinking: {type: "adaptive"} (it only takes the older
+    // budget_tokens form) — this rewrite doesn't need extended thinking, so
+    // thinking is omitted entirely for the Haiku path rather than ported
+    // over in its older shape.
+    const analysisSystemPrompt =
+      "You are an expert resume writer and a senior technical recruiter for the " +
+      "exact company/role in the job description below. Work through this in order:\n\n" +
+      "1. As the recruiter, score how well the ORIGINAL resume matches the job " +
+      "description (0-100), list up to 5 important keywords/skills the posting " +
+      "emphasizes that the original resume doesn't mention, and up to 3 specific red " +
+      "flags a hiring manager would notice in the first 10 seconds (e.g. no measurable " +
+      "impact, buried relevant experience, jargon mismatch with the posting). Read " +
+      "through the LaTeX markup to the actual content for this analysis.\n" +
+      rewriteInstruction +
+      "3. Re-read your rewrite as an ATS filter and as a hiring manager skimming 200 " +
+      "resumes in one sitting — if any section would still get skipped, revise it.\n\n" +
+      "Report matchScore, missingKeywords, and redFlags for the ORIGINAL resume " +
+      "(step 1, before your rewrite) so the user can see what was wrong and what you " +
+      "fixed — not a re-score of your own output.";
+
+    const isLargeInput = resume.length > LARGE_INPUT_THRESHOLD;
+
     const [analysis, coverLetter] = await Promise.all([
       client.messages
-        .stream({
-          model: "claude-sonnet-5",
-          max_tokens: 12000,
-          thinking: { type: "adaptive" },
-          system:
-            "You are an expert resume writer and a senior technical recruiter for the " +
-            "exact company/role in the job description below. Work through this in order:\n\n" +
-            "1. As the recruiter, score how well the ORIGINAL resume matches the job " +
-            "description (0-100), list up to 5 important keywords/skills the posting " +
-            "emphasizes that the original resume doesn't mention, and up to 3 specific red " +
-            "flags a hiring manager would notice in the first 10 seconds (e.g. no measurable " +
-            "impact, buried relevant experience, jargon mismatch with the posting). Read " +
-            "through the LaTeX markup to the actual content for this analysis.\n" +
-            rewriteInstruction +
-            "3. Re-read your rewrite as an ATS filter and as a hiring manager skimming 200 " +
-            "resumes in one sitting — if any section would still get skipped, revise it.\n\n" +
-            "Report matchScore, missingKeywords, and redFlags for the ORIGINAL resume " +
-            "(step 1, before your rewrite) so the user can see what was wrong and what you " +
-            "fixed — not a re-score of your own output.",
-          messages: [{ role: "user", content: userContent }],
-          output_config: {
-            format: zodOutputFormat(TailorResultSchema),
-            effort: "low",
-          },
-        })
+        .stream(
+          isLargeInput
+            ? {
+                model: "claude-haiku-4-5",
+                max_tokens: 12000,
+                system: analysisSystemPrompt,
+                messages: [{ role: "user", content: userContent }],
+                output_config: { format: zodOutputFormat(TailorResultSchema) },
+              }
+            : {
+                model: "claude-sonnet-5",
+                max_tokens: 12000,
+                thinking: { type: "adaptive" },
+                system: analysisSystemPrompt,
+                messages: [{ role: "user", content: userContent }],
+                output_config: {
+                  format: zodOutputFormat(TailorResultSchema),
+                  effort: "low",
+                },
+              },
+        )
         .finalMessage(),
       client.messages
         .stream({

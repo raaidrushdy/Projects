@@ -8,6 +8,12 @@ const STEPS = [
   { label: "Writing your cover letter", after: 13000 },
 ];
 
+// The last step can sit "active" for the rest of the ~60s request with
+// nothing else on screen moving — long enough to read as frozen. This
+// surfaces after the last step has been active a while, so a slow request
+// still looks alive instead of going quiet.
+const LONG_WAIT_AFTER = 25000;
+
 function CheckIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3" aria-hidden="true">
@@ -22,10 +28,16 @@ function CheckIcon() {
     pretending to know the model's actual progress. */
 export function TailoringProgress() {
   const [stepIndex, setStepIndex] = useState(0);
+  const [showLongWait, setShowLongWait] = useState(false);
 
   useEffect(() => {
     const timers = STEPS.slice(1).map((step, i) => setTimeout(() => setStepIndex(i + 1), step.after));
     return () => timers.forEach(clearTimeout);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowLongWait(true), LONG_WAIT_AFTER);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -53,6 +65,12 @@ export function TailoringProgress() {
           </div>
         );
       })}
+
+      {showLongWait && (
+        <p className="border-t border-line pt-4 text-xs text-muted">
+          Still working — longer or more detailed resumes can take up to a minute.
+        </p>
+      )}
     </div>
   );
 }

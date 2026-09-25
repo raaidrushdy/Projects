@@ -68,11 +68,15 @@ function OpenInOverleafButton({ tex }: { tex: string }) {
   );
 }
 
-/** Score + "X of Y key skills covered" + a link into the Changes tab.
-    Replaces the old full-size match-score block as the default, always-
-    visible summary; the full detail (score circle, keyword chips, red
-    flags) now lives inside the Changes tab. Neutral/indigo only — no
-    score-banded color, on purpose. */
+/** Score + missing-keyword count + a link into the Changes tab. Replaces
+    the old full-size match-score block as the default, always-visible
+    summary; the full detail (score circle, keyword chips, red flags) now
+    lives inside the Changes tab. Neutral/indigo only — no score-banded
+    color, on purpose.
+
+    The count is phrased as "N keywords worked in", not a fraction of
+    itself (missingKeywords is both the numerator and denominator there,
+    so an "X of Y" framing always reads 100% and says nothing). */
 function SummaryBar({
   matchScore,
   missingKeywords,
@@ -92,7 +96,9 @@ function SummaryBar({
       </span>
       <span aria-hidden="true" className="h-4 w-px bg-line" />
       <span className="text-muted">
-        {total > 0 ? `${total} of ${total} key skills covered` : "All key skills already covered"}
+        {total > 0
+          ? `${total} missing keyword${total === 1 ? "" : "s"} worked in`
+          : "No key skills were missing"}
       </span>
       {total > 0 && (
         <>

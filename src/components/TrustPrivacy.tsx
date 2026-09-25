@@ -23,6 +23,13 @@ export function TrustPrivacy() {
   return (
     <section id="privacy" className="flex scroll-mt-24 flex-col gap-4 border-t border-line pt-10">
       <h2 className="text-xl font-semibold tracking-tight">Trust and privacy</h2>
+      <p className="text-sm text-muted">
+        I built Redrafted because tailoring a resume to every posting is tedious enough that
+        most people skip it, even though it meaningfully improves response rates. It automates
+        the rewrite — reordering and rephrasing what&apos;s already on your resume to match the
+        posting&apos;s language — without inventing anything new. Here&apos;s what that means
+        for your data:
+      </p>
       <ul className="flex flex-col gap-2.5">
         {POINTS.map((point) => (
           <li key={point} className="flex gap-2.5 text-sm text-muted">

@@ -2,9 +2,17 @@
 
 import { useMemo, useRef, useState, type ChangeEvent, type DragEvent, type UIEvent } from "react";
 import { parseJsonResponse } from "@/lib/api";
+import { MAX_INPUT_CHARS } from "@/lib/limits";
 
 const ACCEPTED_EXTENSIONS = [".tex"];
 const MIN_GUTTER_LINES = 12;
+// Below this length a partial paste/first few keystrokes shouldn't trigger
+// the "doesn't look like LaTeX" warning.
+const LATEX_CHECK_MIN_CHARS = 40;
+
+function looksLikeLatex(text: string): boolean {
+  return /\\(documentclass|begin\{document\})/.test(text);
+}
 
 interface ResumeFieldProps {
   value: string;
@@ -49,6 +57,11 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
     () => Math.max(value.split("\n").length, MIN_GUTTER_LINES),
     [value],
   );
+
+  const charCount = value.length;
+  const isOverLimit = charCount > MAX_INPUT_CHARS;
+  const showLatexWarning =
+    charCount >= LATEX_CHECK_MIN_CHARS && !looksLikeLatex(value);
 
   async function uploadFile(file: File) {
     if (!isAcceptedFile(file)) {
@@ -156,14 +169,19 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
               Load example
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="inline-flex min-h-11 items-center gap-1.5 font-medium text-muted transition hover:text-foreground"
-          >
-            <UploadIcon className="h-3.5 w-3.5" />
-            Upload
-          </button>
+          <div className="flex items-center gap-3">
+            <span className={`tabular-nums ${isOverLimit ? "text-score-low" : "text-muted"}`}>
+              {charCount.toLocaleString()} / {MAX_INPUT_CHARS.toLocaleString()}
+            </span>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="inline-flex min-h-11 items-center gap-1.5 font-medium text-muted transition hover:text-foreground"
+            >
+              <UploadIcon className="h-3.5 w-3.5" />
+              Upload
+            </button>
+          </div>
         </div>
 
         <div className="relative flex flex-1 overflow-hidden font-mono text-base">
@@ -206,6 +224,21 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
       </div>
 
       {uploadError && <p className="text-xs text-score-low">{uploadError}</p>}
+
+      {!uploadError && isOverLimit && (
+        <p className="text-xs text-score-low">
+          {charCount.toLocaleString()} characters is over the {MAX_INPUT_CHARS.toLocaleString()}{" "}
+          limit — trim it down before submitting.
+        </p>
+      )}
+
+      {!uploadError && !isOverLimit && showLatexWarning && (
+        <p className="text-xs text-muted">
+          This doesn&apos;t look like LaTeX source (no <code>\documentclass</code> or{" "}
+          <code>\begin&#123;document&#125;</code>) — Redrafted edits .tex files in place, so
+          results may be unreliable.
+        </p>
+      )}
 
       <input
         ref={inputRef}

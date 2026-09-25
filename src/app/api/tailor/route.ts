@@ -2,12 +2,11 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
+import { MAX_INPUT_CHARS } from "@/lib/limits";
 
 export const runtime = "nodejs";
 // The max duration Vercel's Hobby plan allows; see the streaming comment below.
 export const maxDuration = 60;
-
-const MAX_INPUT_CHARS = 20000;
 
 interface TailorRequestBody {
   resume?: string;

@@ -12,6 +12,7 @@ import { ResumeField } from "@/components/ResumeField";
 import { TailoringProgress } from "@/components/TailoringProgress";
 import { TrustPrivacy } from "@/components/TrustPrivacy";
 import { getRemaining, getServerRemaining, recordUse, subscribeToUsage } from "@/lib/usage";
+import { MAX_INPUT_CHARS } from "@/lib/limits";
 
 interface TailorResult {
   matchScore: number;
@@ -45,8 +46,13 @@ export default function Home() {
   const remaining = useSyncExternalStore(subscribeToUsage, getRemaining, getServerRemaining);
 
   const outOfFreeUses = remaining <= 0;
+  const overLength = resume.length > MAX_INPUT_CHARS || jobDescription.length > MAX_INPUT_CHARS;
   const canSubmit =
-    resume.trim().length > 0 && jobDescription.trim().length > 0 && !loading && !outOfFreeUses;
+    resume.trim().length > 0 &&
+    jobDescription.trim().length > 0 &&
+    !loading &&
+    !outOfFreeUses &&
+    !overLength;
 
   async function runTailoring() {
     if (!canSubmit) return;

@@ -77,6 +77,19 @@
   --font-sans: var(--font-manrope), system-ui, sans-serif;
   --font-serif: var(--font-source-serif), Georgia, serif;
   --font-display: var(--font-fredoka), system-ui, sans-serif;
+  /* Headings/UI-chrome only (h1s, section titles, labels) — Manrope stays
+     the body-copy default below so headings actually contrast against it
+     instead of everything being one size of the same face. */
+  --font-heading: var(--font-geist-sans), var(--font-manrope), system-ui, sans-serif;
+  /* Overrides Tailwind's built-in mono stack, so every existing font-mono
+     usage (line numbers, word/char counts, LaTeX panels) picks up Geist
+     Mono for free — no per-component changes needed. */
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Fast, deliberate deceleration — no overshoot/bounce. Used for hover,
+     focus, and tab-switch micro-interactions; entrance/reveal transitions
+     use a plain ease-out instead, a slower, separate motion register. */
+  --ease-precise: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* scrollbar-gutter reserves space for a vertical scrollbar whether or not one
@@ -129,5 +142,41 @@ body {
 
   .step-pulse {
     animation: step-pulse 1.4s ease-in-out infinite;
+  }
+
+  /* Each loading-log line mounts fresh (React only renders steps once
+     they're reached, rather than showing all of them pre-dimmed), so a
+     plain mount animation is enough to get a per-line entrance with no JS
+     animation driver. */
+  @keyframes log-line-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-log-line {
+    animation: log-line-in 0.2s var(--ease-precise) both;
+  }
+
+  /* The step icon is re-keyed (not just re-styled) on the active->done
+     transition so this pop retriggers exactly then, not on every render. */
+  @keyframes check-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-check-pop {
+    animation: check-pop 0.2s var(--ease-precise) both;
   }
 }

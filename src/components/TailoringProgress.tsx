@@ -14,6 +14,13 @@ const STEPS = [
 // still looks alive instead of going quiet.
 const LONG_WAIT_AFTER = 25000;
 
+function formatElapsed(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
 function CheckIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3" aria-hidden="true">
@@ -23,52 +30,69 @@ function CheckIcon() {
 }
 
 /** Client-timed step labels, not a real progress feed: the tailoring API
-    returns one JSON blob at the end, nothing to stream. This gives a person
-    something better to look at than a bare spinner during that wait without
-    pretending to know the model's actual progress. */
+    returns one JSON blob at the end, nothing to stream. Rather than show
+    all three steps up front with a plain spinner, this grows one line at a
+    time as each step is reached, each with a mono elapsed timestamp — the
+    shape of a deploy log, not a loading bar, since that's a closer match
+    for what's actually happening (a sequence of real steps, not a knowable
+    percentage). */
 export function TailoringProgress() {
   const [stepIndex, setStepIndex] = useState(0);
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [completedAt, setCompletedAt] = useState<number[]>([]);
   const [showLongWait, setShowLongWait] = useState(false);
 
   useEffect(() => {
-    const timers = STEPS.slice(1).map((step, i) => setTimeout(() => setStepIndex(i + 1), step.after));
-    return () => timers.forEach(clearTimeout);
-  }, []);
+    const start = Date.now();
+    const tick = setInterval(() => setElapsedMs(Date.now() - start), 1000);
+    const stepTimers = STEPS.slice(1).map((step, i) =>
+      setTimeout(() => {
+        setStepIndex(i + 1);
+        setCompletedAt((prev) => [...prev, Date.now() - start]);
+      }, step.after),
+    );
+    const longWaitTimer = setTimeout(() => setShowLongWait(true), LONG_WAIT_AFTER);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowLongWait(true), LONG_WAIT_AFTER);
-    return () => clearTimeout(timer);
+    return () => {
+      clearInterval(tick);
+      stepTimers.forEach(clearTimeout);
+      clearTimeout(longWaitTimer);
+    };
   }, []);
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className="flex flex-col gap-4 rounded-3xl border border-line bg-panel p-8 sm:p-10"
+      className="flex flex-col gap-1 rounded-3xl border border-line bg-panel p-8 sm:p-10"
     >
       {STEPS.map((step, i) => {
-        const state = i < stepIndex ? "done" : i === stepIndex ? "active" : "pending";
+        if (i > stepIndex) return null;
+        const isDone = i < stepIndex;
+
         return (
-          <div key={step.label} className="flex items-center gap-3">
+          <div key={step.label} className="animate-log-line flex items-center gap-3 py-1.5">
             <span
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
-                state === "done"
-                  ? "border-accent bg-accent text-accent-foreground"
-                  : state === "active"
-                    ? "border-accent text-accent"
-                    : "border-line text-muted"
+              key={isDone ? "done" : "active"}
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ease-precise ${
+                isDone ? "animate-check-pop border-accent bg-accent text-accent-foreground" : "border-accent text-accent"
               }`}
             >
-              {state === "done" ? <CheckIcon /> : state === "active" ? <span className="step-pulse h-2 w-2 rounded-full bg-accent" /> : null}
+              {isDone ? <CheckIcon /> : <span className="step-pulse h-1.5 w-1.5 rounded-full bg-accent" />}
             </span>
-            <span className={`text-sm ${state === "pending" ? "text-muted" : "text-foreground"}`}>{step.label}</span>
+            <span className={`flex-1 text-sm transition-colors duration-200 ${isDone ? "text-muted" : "text-foreground"}`}>
+              {step.label}
+            </span>
+            <span className="font-mono text-xs tabular-nums text-muted">
+              {formatElapsed(isDone ? completedAt[i] : elapsedMs)}
+            </span>
           </div>
         );
       })}
 
       {showLongWait && (
-        <p className="border-t border-line pt-4 text-xs text-muted">
-          Still working — longer or more detailed resumes can take up to a minute.
+        <p className="animate-log-line mt-3 border-t border-line pt-3 text-xs text-muted">
+          Still compiling. Bigger documents, bigger builds.
         </p>
       )}
     </div>

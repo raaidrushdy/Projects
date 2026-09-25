@@ -116,20 +116,23 @@ export default function Home() {
       <div className="flex-1">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-14 lg:max-w-4xl">
           {!result && (
-            <div id="top" className="flex scroll-mt-24 flex-col items-center gap-3 pt-2 text-center">
-              <h1 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                Your LaTeX resume, rewritten for every job.
+            <div
+              id="top"
+              className="animate-reveal flex scroll-mt-24 flex-col items-center gap-4 pt-2 text-center"
+            >
+              <h1 className="max-w-2xl font-heading text-3xl font-semibold tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+                Your resume, recompiled for the job.
               </h1>
-              <p className="max-w-md text-muted sm:text-lg">
-                Paste your .tex resume and the job posting. Get a tailored resume and cover
-                letter back in seconds.
+              <p className="max-w-md text-base text-muted sm:text-lg">
+                Paste your .tex resume and the job posting. Get back a version that actually
+                matches, fast.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span className="rounded-full border border-accent/30 px-3 py-1 text-xs font-medium text-accent">
-                  Free while we&apos;re testing
+                  Free while testing
                 </span>
-                <span className="rounded-full border border-line px-3 py-1 text-xs font-medium text-muted">
-                  Built for LaTeX resumes
+                <span className="rounded-full border border-line px-3 py-1 font-mono text-xs text-muted">
+                  .tex only
                 </span>
               </div>
             </div>

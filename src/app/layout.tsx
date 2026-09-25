@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import { Fredoka, Manrope, Source_Serif_4 } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Footer } from "@/components/Footer";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-// Manrope for app chrome (labels, buttons, UI text) — a deliberate choice
-// over the unexamined Inter/Geist default. Source Serif for the tailored
-// resume/cover letter output specifically: it's the one place in the app
-// that should read as a document the user is about to submit somewhere,
-// not as UI. Fredoka for the wordmark only — one place for personality,
-// not spread across the whole UI.
+// Geist for headings and monospace chrome (line numbers, counters, the
+// loading log) — reaching for it deliberately this time, because the brief
+// is explicitly "push this toward the Linear/Vercel aesthetic," and Geist is
+// that aesthetic's own typeface. Manrope stays as the body/paragraph font
+// (still very legible, gives headings something to contrast against rather
+// than every size of the same face). Source Serif is unchanged for the
+// tailored resume/cover letter output. Fredoka stays on the wordmark only.
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
@@ -38,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${manrope.variable} ${sourceSerif.variable} ${fredoka.variable} antialiased`}
+      className={`${manrope.variable} ${sourceSerif.variable} ${fredoka.variable} ${GeistSans.variable} ${GeistMono.variable} antialiased`}
     >
       <head>
         {/* Sets data-theme before first paint (localStorage, else system

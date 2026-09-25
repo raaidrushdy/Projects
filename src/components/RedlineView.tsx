@@ -49,8 +49,10 @@ export function RedlineView({ before, after }: RedlineViewProps) {
             role="tab"
             aria-selected={mode === option.id}
             onClick={() => setMode(option.id)}
-            className={`inline-flex min-h-9 items-center justify-center rounded-full px-3 font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-accent/50 ${
-              mode === option.id ? "bg-accent text-accent-foreground" : "text-muted hover:text-foreground"
+            className={`inline-flex min-h-9 items-center justify-center rounded-full px-3 font-medium outline-none transition-all duration-180 ease-precise focus-visible:ring-2 focus-visible:ring-accent/50 ${
+              mode === option.id
+                ? "bg-accent text-accent-foreground shadow-[0_0_16px_-4px_var(--color-accent)]"
+                : "text-muted hover:bg-foreground/5 hover:text-foreground"
             }`}
           >
             {option.label}

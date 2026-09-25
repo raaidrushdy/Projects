@@ -35,7 +35,7 @@ export function Header({ onLogoClick }: HeaderProps = {}) {
                 }
               : undefined
           }
-          className="flex cursor-pointer items-center gap-2.5 rounded-lg -mx-2 -my-1 px-2 py-1 transition hover:bg-foreground/5"
+          className="flex cursor-pointer items-center gap-2.5 rounded-lg -mx-2 -my-1 px-2 py-1 outline-none transition-colors duration-180 ease-precise hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-accent/50 active:scale-[0.98]"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground">
             <LogoMark />
@@ -44,10 +44,16 @@ export function Header({ onLogoClick }: HeaderProps = {}) {
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-6 text-sm font-medium text-muted sm:flex">
-          <a href="#how-it-works" className="transition hover:text-foreground">
+          <a
+            href="#how-it-works"
+            className="rounded-sm outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
+          >
             How it works
           </a>
-          <a href="#faq" className="transition hover:text-foreground">
+          <a
+            href="#faq"
+            className="rounded-sm outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
+          >
             FAQ
           </a>
         </nav>

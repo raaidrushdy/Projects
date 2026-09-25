@@ -22,7 +22,7 @@ const POINTS = [
 export function TrustPrivacy() {
   return (
     <section id="privacy" className="flex scroll-mt-24 flex-col gap-4 border-t border-line pt-10">
-      <h2 className="text-xl font-semibold tracking-tight">Trust and privacy</h2>
+      <h2 className="font-heading text-xl font-semibold tracking-tight">Trust and privacy</h2>
       <p className="text-sm text-muted">
         I built Redrafted because tailoring a resume to every posting is tedious enough that
         most people skip it, even though it meaningfully improves response rates. It automates
@@ -40,7 +40,7 @@ export function TrustPrivacy() {
       </ul>
       <a
         href="/privacy"
-        className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-accent underline decoration-accent/30 underline-offset-2 transition hover:decoration-accent"
+        className="inline-flex min-h-11 w-fit items-center rounded-sm text-sm font-medium text-accent underline decoration-accent/30 underline-offset-2 outline-none transition-colors duration-180 ease-precise hover:decoration-accent focus-visible:ring-2 focus-visible:ring-accent/50"
       >
         Read the full privacy policy
       </a>

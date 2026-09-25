@@ -24,7 +24,7 @@ export function JobDescriptionField({ value, onChange }: JobDescriptionFieldProp
           edges match exactly. */}
       <div className="flex h-80 flex-col overflow-hidden rounded-lg bg-surface shadow-sm transition focus-within:ring-2 focus-within:ring-accent/40">
         <div className="flex min-h-11 items-center justify-end border-b border-line px-3 font-sans text-xs text-muted">
-          <span className="tabular-nums">
+          <span className="font-mono tabular-nums">
             {wordCount} {wordCount === 1 ? "word" : "words"}
           </span>
         </div>

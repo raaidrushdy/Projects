@@ -43,10 +43,14 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-foreground/5"
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted outline-none transition-colors duration-180 ease-precise hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-accent/50 active:scale-[0.97]"
     >
-      {copied ? <CheckIcon className="text-score-high" /> : <CopyIcon />}
-      {copied ? "Copied!" : label}
+      {copied ? (
+        <CheckIcon key="check" className="animate-check-pop text-score-high" />
+      ) : (
+        <CopyIcon key="copy" />
+      )}
+      {copied ? "Copied" : label}
     </button>
   );
 }

@@ -7,7 +7,7 @@ const STEPS = [
 export function HowItWorks() {
   return (
     <section id="how-it-works" className="flex scroll-mt-24 flex-col gap-6 border-t border-line pt-10">
-      <h2 className="text-xl font-semibold tracking-tight">How it works</h2>
+      <h2 className="font-heading text-xl font-semibold tracking-tight">How it works</h2>
       <div className="grid gap-6 sm:grid-cols-3">
         {STEPS.map((step) => (
           <div key={step.n} className="flex items-start gap-3">

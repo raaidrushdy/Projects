@@ -156,7 +156,7 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
             <button
               type="button"
               onClick={clearFile}
-              className="inline-flex min-h-11 items-center text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+              className="inline-flex min-h-11 items-center rounded-sm text-muted underline decoration-current/30 underline-offset-2 outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
             >
               {fileName} · clear
             </button>
@@ -164,19 +164,19 @@ export function ResumeField({ value, onChange, onLoadExample }: ResumeFieldProps
             <button
               type="button"
               onClick={handleLoadExample}
-              className="inline-flex min-h-11 items-center text-muted underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+              className="inline-flex min-h-11 items-center rounded-sm text-muted underline decoration-current/30 underline-offset-2 outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
             >
               Load example
             </button>
           )}
           <div className="flex items-center gap-3">
-            <span className={`tabular-nums ${isOverLimit ? "text-score-low" : "text-muted"}`}>
+            <span className={`font-mono tabular-nums ${isOverLimit ? "text-score-low" : "text-muted"}`}>
               {charCount.toLocaleString()} / {MAX_INPUT_CHARS.toLocaleString()}
             </span>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="inline-flex min-h-11 items-center gap-1.5 font-medium text-muted transition hover:text-foreground"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-sm font-medium text-muted outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
             >
               <UploadIcon className="h-3.5 w-3.5" />
               Upload

@@ -11,13 +11,13 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
           <a
             href={FEEDBACK_MAILTO}
-            className="inline-flex min-h-11 items-center underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+            className="inline-flex min-h-11 items-center rounded-sm underline decoration-current/30 underline-offset-2 outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             Contact us
           </a>
           <a
             href="/privacy"
-            className="inline-flex min-h-11 items-center underline decoration-current/30 underline-offset-2 transition hover:text-foreground"
+            className="inline-flex min-h-11 items-center rounded-sm underline decoration-current/30 underline-offset-2 outline-none transition-colors duration-180 ease-precise hover:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             Privacy
           </a>

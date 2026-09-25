@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import { parseJsonResponse } from "@/lib/api";
 import { EXAMPLE_JOB_DESCRIPTION, EXAMPLE_RESUME } from "@/lib/example";
 import { Faq } from "@/components/Faq";
@@ -54,7 +54,7 @@ export default function Home() {
     !outOfFreeUses &&
     !overLength;
 
-  async function runTailoring() {
+  const runTailoring = useCallback(async () => {
     if (!canSubmit) return;
 
     setLoading(true);
@@ -84,7 +84,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [canSubmit, resume, jobDescription]);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -109,6 +109,17 @@ export default function Home() {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   }
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        void runTailoring();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [runTailoring]);
 
   return (
     <>
@@ -173,16 +184,22 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground transition disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <SparkleIcon />
-                Tailor my resume
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground outline-none transition-all duration-180 ease-precise hover:brightness-110 focus-visible:ring-2 focus-visible:ring-accent/50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 disabled:active:scale-100"
+                >
+                  <SparkleIcon />
+                  Tailor my resume
+                </button>
+                <span className="hidden items-center gap-1 font-mono text-xs text-muted sm:inline-flex">
+                  <kbd className="rounded border border-line bg-surface px-1.5 py-0.5">⌘</kbd>
+                  <kbd className="rounded border border-line bg-surface px-1.5 py-0.5">Enter</kbd>
+                </span>
+              </div>
 
-              <span className="text-sm text-muted">
+              <span className={`text-sm text-muted ${outOfFreeUses ? "" : "font-mono tabular-nums"}`}>
                 {outOfFreeUses
                   ? "You've hit today's usage cap on this browser."
                   : `${remaining} free tailoring${remaining === 1 ? "" : "s"} left on this browser`}
@@ -208,7 +225,7 @@ export default function Home() {
                   type="button"
                   onClick={() => void runTailoring()}
                   disabled={!canSubmit}
-                  className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-score-low/40 px-3 py-1.5 text-sm font-medium transition hover:bg-score-low/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-score-low/40 px-3 py-1.5 text-sm font-medium outline-none transition-colors duration-180 ease-precise hover:bg-score-low/10 focus-visible:ring-2 focus-visible:ring-score-low/50 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100"
                 >
                   Retry
                 </button>

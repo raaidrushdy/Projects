@@ -5,7 +5,7 @@ function ChevronIcon() {
       fill="none"
       stroke="currentColor"
       strokeWidth={1.6}
-      className="h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-180"
+      className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 ease-precise group-open:rotate-180"
       aria-hidden="true"
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
@@ -39,11 +39,11 @@ const FAQ_ITEMS = [
 export function Faq() {
   return (
     <section id="faq" className="flex scroll-mt-24 flex-col gap-4 border-t border-line pt-10">
-      <h2 className="text-xl font-semibold tracking-tight">FAQ</h2>
+      <h2 className="font-heading text-xl font-semibold tracking-tight">FAQ</h2>
       <div className="flex flex-col divide-y divide-line">
         {FAQ_ITEMS.map((item) => (
           <details key={item.q} className="group py-4 first:pt-0">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-sm text-sm font-medium outline-none transition-colors duration-180 ease-precise hover:text-accent focus-visible:ring-2 focus-visible:ring-accent/50 [&::-webkit-details-marker]:hidden">
               {item.q}
               <ChevronIcon />
             </summary>

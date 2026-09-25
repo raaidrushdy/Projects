@@ -104,9 +104,15 @@ export default function Home() {
     setError(null);
   }
 
+  function resetToHome() {
+    startOver();
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  }
+
   return (
     <>
-      <Header />
+      <Header onLogoClick={resetToHome} />
       <div className="flex-1">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-14 lg:max-w-4xl">
           {!result && (

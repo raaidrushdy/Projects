@@ -102,6 +102,15 @@ export async function POST(request: Request) {
     // just different phrasing), so it's split into its own smaller, lower-
     // effort call and run concurrently with the analysis+rewrite call: wall
     // time is now roughly the slower of the two instead of their sum.
+    //
+    // Timeouts kept recurring in production even after that split, so the
+    // remaining bottleneck (the analysis+rewrite call, since it generates the
+    // full LaTeX document) is now effort "low" instead of "medium" — this
+    // does trade some rewrite quality/thoroughness for a further latency
+    // cut, since on Vercel Hobby there's no way to raise the 60s ceiling
+    // itself. If timeouts persist on very large resumes even at this
+    // setting, the remaining fix is raising maxDuration on a paid Vercel
+    // plan (Hobby hard-caps it at 60 regardless of what's set here).
     const [analysis, coverLetter] = await Promise.all([
       client.messages
         .stream({
@@ -126,7 +135,7 @@ export async function POST(request: Request) {
           messages: [{ role: "user", content: userContent }],
           output_config: {
             format: zodOutputFormat(TailorResultSchema),
-            effort: "medium",
+            effort: "low",
           },
         })
         .finalMessage(),

@@ -176,6 +176,17 @@ export async function POST(request: Request) {
       throw new Error("Model response did not match the expected schema");
     }
 
+    // parsed_output existing only means the JSON matched the schema shape —
+    // a rare structured-output glitch can still land a near-empty string in
+    // a string field and pass that check. tailoredResume is the one field
+    // that must be a real, complete LaTeX document (the user pastes it
+    // straight into Overleaf or a compiler), so it gets its own check rather
+    // than trusting the schema alone.
+    const tailoredResume = analysis.parsed_output.tailoredResume.trim();
+    if (!tailoredResume.startsWith("\\documentclass") || !tailoredResume.endsWith("\\end{document}")) {
+      throw new Error("Model returned an incomplete LaTeX document");
+    }
+
     return NextResponse.json({
       ...analysis.parsed_output,
       coverLetter: coverLetter.parsed_output.coverLetter,

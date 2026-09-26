@@ -111,14 +111,21 @@ export async function POST(request: Request) {
     // lower-effort call and run concurrently with the analysis+rewrite call:
     // wall time is now roughly the slower of the two instead of their sum.
     //
-    // Switched back to Sonnet 5 at effort "high": Opus at effort "low" was
-    // never latency-bound on model choice (effort was doing the limiting
-    // work, per the earlier measurement), so running Opus bought no speed —
-    // only ~2.5x the per-token cost — while trading away rewrite
-    // thoroughness for a cut that model choice alone didn't need. Sonnet at
-    // "high" restores that thoroughness at a fraction of Opus's price; watch
-    // wall time in production and drop effort again if it creeps back
-    // toward the old timeout territory.
+    // Switched back to Sonnet 5: Opus at effort "low" was never
+    // latency-bound on model choice (effort was doing the limiting work, per
+    // the earlier measurement), so running Opus bought no speed — only
+    // ~2.5x the per-token cost — while trading away rewrite thoroughness for
+    // a cut that model choice alone didn't need.
+    //
+    // The analysis+rewrite call (the slower of the two — it also generates
+    // the full rewritten LaTeX document) runs at effort "medium" rather than
+    // "high": "high" measured ~90s end-to-end, and per Anthropic's own
+    // guidance "medium" is usually the cost/latency step-down that holds
+    // quality for coding/writing tasks like this one, unlike "low" which
+    // visibly cost thoroughness on Opus. Re-check output quality on a few
+    // real resumes after this change; bump back to "high" if it's not
+    // holding up. The cover letter call stays at "high" since it's small
+    // (max_tokens: 1500) and isn't the latency bottleneck.
     const analysisSystemPrompt =
       "You are an expert resume writer and a senior technical recruiter for the " +
       "exact company/role in the job description below. Work through this in order:\n\n" +
@@ -145,7 +152,7 @@ export async function POST(request: Request) {
           messages: [{ role: "user", content: userContent }],
           output_config: {
             format: zodOutputFormat(TailorResultSchema),
-            effort: "high",
+            effort: "medium",
           },
         })
         .finalMessage(),

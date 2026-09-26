@@ -111,16 +111,14 @@ export async function POST(request: Request) {
     // lower-effort call and run concurrently with the analysis+rewrite call:
     // wall time is now roughly the slower of the two instead of their sum.
     //
-    // Timeouts kept recurring in production even after that split, so the
-    // remaining bottleneck (the analysis+rewrite call, since it generates the
-    // full LaTeX document) runs at effort "low" — this does trade some
-    // rewrite quality/thoroughness for a latency cut. Both calls use Opus 5
-    // (best output, fewest errors): measured directly, a near-14,000-char
-    // resume (the input cap) on Opus finished in ~22-25s, no slower than
-    // Sonnet was at similar sizes — effort "low" turned out to be doing most
-    // of the latency-limiting work, not model choice, so there was no real
-    // latency reason left to downgrade the model on either call, only cost
-    // (Opus is ~2.5x Sonnet's per-token price).
+    // Switched back to Sonnet 5 at effort "high": Opus at effort "low" was
+    // never latency-bound on model choice (effort was doing the limiting
+    // work, per the earlier measurement), so running Opus bought no speed —
+    // only ~2.5x the per-token cost — while trading away rewrite
+    // thoroughness for a cut that model choice alone didn't need. Sonnet at
+    // "high" restores that thoroughness at a fraction of Opus's price; watch
+    // wall time in production and drop effort again if it creeps back
+    // toward the old timeout territory.
     const analysisSystemPrompt =
       "You are an expert resume writer and a senior technical recruiter for the " +
       "exact company/role in the job description below. Work through this in order:\n\n" +
@@ -140,20 +138,20 @@ export async function POST(request: Request) {
     const [analysis, coverLetter] = await Promise.all([
       client.messages
         .stream({
-          model: "claude-opus-5",
+          model: "claude-sonnet-5",
           max_tokens: 12000,
           thinking: { type: "adaptive" },
           system: analysisSystemPrompt,
           messages: [{ role: "user", content: userContent }],
           output_config: {
             format: zodOutputFormat(TailorResultSchema),
-            effort: "low",
+            effort: "high",
           },
         })
         .finalMessage(),
       client.messages
         .stream({
-          model: "claude-opus-5",
+          model: "claude-sonnet-5",
           max_tokens: 1500,
           thinking: { type: "adaptive" },
           system:
@@ -166,7 +164,7 @@ export async function POST(request: Request) {
           messages: [{ role: "user", content: userContent }],
           output_config: {
             format: zodOutputFormat(CoverLetterResultSchema),
-            effort: "low",
+            effort: "high",
           },
         })
         .finalMessage(),
